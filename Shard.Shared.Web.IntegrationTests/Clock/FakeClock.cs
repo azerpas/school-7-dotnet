@@ -20,9 +20,10 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             = new ConcurrentDictionary<IEvent, IEvent>();
 
         private void AddEvent(IEvent anEvent)
-        {
-            events.TryAdd(anEvent, anEvent);
-        }
+            => events.TryAdd(anEvent, anEvent);
+
+        private bool TryRemoveEvent(IEvent anEvent)
+            => events.TryRemove(anEvent, out _);
 
         public DateTime Now { get; private set; }
 
@@ -49,10 +50,10 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
         {
             var eventToTrigger = FindNextEvent(now);
 
-            if (eventToTrigger == null || !events.TryRemove(eventToTrigger, out _))
+            if (eventToTrigger == null || !TryRemoveEvent(eventToTrigger))
                 return false;
 
-            this.Now = eventToTrigger.TriggerTime;
+            Now = eventToTrigger.TriggerTime;
             eventToTrigger.Trigger();
             return true;
         }
@@ -112,34 +113,27 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             => CreateTimer(callback, this, uint.MaxValue, uint.MaxValue);
 
         public ITimer CreateTimer(TimerCallback callback, object state, TimeSpan dueTime, TimeSpan period)
-            => CreateTimer(callback, this, (long)dueTime.TotalMilliseconds, (long)period.TotalMilliseconds);
+            => CreateTimer(callback, state, (long)dueTime.TotalMilliseconds, (long)period.TotalMilliseconds);
 
         public ITimer CreateTimer(TimerCallback callback, object state, int dueTime, int period)
         {
-            if (dueTime < -1)
-                throw new ArgumentOutOfRangeException(nameof(dueTime), "cannot be lower than -1");
-            if (period < -1)
-                throw new ArgumentOutOfRangeException(nameof(period), "cannot be lower than -1");
-            return CreateTimer(callback, this, (uint)dueTime, (uint)period);
+            var timer = new Timer(this, callback, state);
+            timer.Change(dueTime, period);
+            return timer;
         }
 
         public ITimer CreateTimer(TimerCallback callback, object state, long dueTime, long period)
         {
-            if (dueTime < -1)
-                throw new ArgumentOutOfRangeException(nameof(dueTime), "cannot be lower than -1");
-            if (period < -1)
-                throw new ArgumentOutOfRangeException(nameof(period), "cannot be lower than -1");
-            if (dueTime >= uint.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(dueTime), "cannot exceed " + uint.MaxValue);
-            if (period >= uint.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(period), "cannot exceed " + uint.MaxValue);
-
-            return CreateTimer(callback, this, dueTime, period);
+            var timer = new Timer(this, callback, state);
+            timer.Change(dueTime, period);
+            return timer;
         }
 
         public ITimer CreateTimer(TimerCallback callback, object state, uint dueTime, uint period)
         {
-            throw new NotImplementedException();
+            var timer = new Timer(this, callback, state);
+            timer.Change(dueTime, period);
+            return timer;
         }
     }
 }

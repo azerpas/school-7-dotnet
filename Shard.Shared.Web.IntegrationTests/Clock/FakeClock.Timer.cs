@@ -9,20 +9,28 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
 {
     public partial class FakeClock
     {
-        public class Timer : ITimer
+        public class Timer : ITimer, IEvent
         {
+            private readonly FakeClock clock;
             private readonly TimerCallback callback;
             private readonly object state;
-            private readonly uint dueTime;
-            private readonly uint period;
 
-            public Timer(TimerCallback callback, object state, uint dueTime, uint period)
+            private DateTime lastChangeTime;
+            private uint dueTime = uint.MaxValue;
+            private uint period = uint.MaxValue;
+
+            public Timer(FakeClock clock, TimerCallback callback, object state)
             {
+                this.clock = clock;
                 this.callback = callback;
                 this.state = state;
-                this.dueTime = dueTime;
-                this.period = period;
             }
+
+            public DateTime TriggerTime
+                => lastChangeTime.AddMilliseconds(dueTime);
+
+            public bool Change(TimeSpan dueTime, TimeSpan period)
+                => Change((long)dueTime.TotalMilliseconds, (long)period.TotalMilliseconds);
 
             public bool Change(int dueTime, int period)
             {
@@ -30,7 +38,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
                     throw new ArgumentOutOfRangeException(nameof(dueTime), "cannot be lower than -1");
                 if (period < -1)
                     throw new ArgumentOutOfRangeException(nameof(period), "cannot be lower than -1");
-                throw new NotImplementedException();
+                return Change((uint) dueTime, (uint) period);
             }
 
             public bool Change(long dueTime, long period)
@@ -43,30 +51,39 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
                     throw new ArgumentOutOfRangeException(nameof(dueTime), "cannot exceed " + uint.MaxValue);
                 if (period >= uint.MaxValue)
                     throw new ArgumentOutOfRangeException(nameof(period), "cannot exceed " + uint.MaxValue);
-                throw new NotImplementedException();
+                return Change((uint) dueTime, (uint) period);
             }
-
-            public bool Change(TimeSpan dueTime, TimeSpan period)
-                => Change((long)dueTime.TotalMilliseconds, (long)period.TotalMilliseconds);
 
             public bool Change(uint dueTime, uint period)
             {
-                throw new NotImplementedException();
+                lastChangeTime = clock.Now;
+
+                this.dueTime = dueTime;
+                this.period = period != 0 ? period : uint.MaxValue;
+
+                if (this.dueTime == 0)
+                    Trigger();
+                else
+                    clock.AddEvent(this);
+
+                return true;
+            }
+
+            public void Trigger()
+            {
+                callback(state);
+                Change(period, period);
             }
 
             public void Dispose()
             {
-                throw new NotImplementedException();
-            }
-
-            public bool Dispose(WaitHandle notifyObject)
-            {
-                throw new NotImplementedException();
+                clock.TryRemoveEvent(this);
             }
 
             public ValueTask DisposeAsync()
             {
-                throw new NotImplementedException();
+                Dispose();
+                return new ValueTask(Task.CompletedTask);
             }
         }
     }

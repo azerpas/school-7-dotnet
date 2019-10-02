@@ -149,5 +149,214 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
                 triggerTime = clock.Now;
             }
         }
+
+        [Fact]
+        public void CreateTimer_InfiniteDueTime_NeverTriggers()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: -1,
+                period: 1);
+
+            clock.SetNow(clock.Now.AddDays(30));
+            Assert.False(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_ZeroDueTime_TriggersImmediatly()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: 0,
+                period: 1);
+
+            Assert.True(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_NotTriggeredAt4ms()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: 5,
+                period: 1);
+
+            clock.SetNow(clock.Now.AddMilliseconds(4));
+            Assert.False(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_TriggeredAt5ms()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: 5,
+                period: 1);
+
+            clock.SetNow(clock.Now.AddMilliseconds(5));
+            Assert.True(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_And0Period_TriggeredOnce()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: 5,
+                period: 0);
+
+            clock.SetNow(clock.Now.AddMilliseconds(5));
+
+            triggered = false;
+            clock.SetNow(clock.Now.AddDays(30));
+            Assert.False(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_AndInfinitePeriod_TriggeredOnce()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: 5,
+                period: -1);
+
+            clock.SetNow(clock.Now.AddMilliseconds(5));
+
+            triggered = false;
+            clock.SetNow(clock.Now.AddDays(30));
+            Assert.False(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_And2msPeriod_TriggeredOnceAt6ms()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: 5,
+                period: 2);
+
+            clock.SetNow(clock.Now.AddMilliseconds(5));
+
+            triggered = false;
+            clock.SetNow(clock.Now.AddMilliseconds(1));
+            Assert.False(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_And2msPeriod_TriggeredTwiceAt7ms()
+        {
+            bool triggered = false;
+            using var timer = clock.CreateTimer(
+                _ => triggered = true,
+                state: null,
+                dueTime: 5,
+                period: 2);
+
+            clock.SetNow(clock.Now.AddMilliseconds(5));
+
+            triggered = false;
+            clock.SetNow(clock.Now.AddMilliseconds(2));
+            Assert.True(triggered);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_And2msPeriod_TriggeredTwiceAt7ms_EvenAtOnce()
+        {
+            int triggeredCount = 0;
+            using var timer = clock.CreateTimer(
+                _ => triggeredCount++,
+                state: null,
+                dueTime: 5,
+                period: 2);
+
+            clock.SetNow(clock.Now.AddMilliseconds(7));
+            Assert.Equal(2, triggeredCount);
+        }
+
+        [Fact]
+        public void CreateTimer_5msDueTime_And2msPeriod_TriggeredThriceAt9ms_EvenAtOnce()
+        {
+            int triggeredCount = 0;
+            using var timer = clock.CreateTimer(
+                _ => triggeredCount++,
+                state: null,
+                dueTime: 5,
+                period: 2);
+
+            clock.SetNow(clock.Now.AddMilliseconds(9));
+            Assert.Equal(3, triggeredCount);
+        }
+
+        [Fact]
+        public void CreateTimer_StateIsPassedWhenReachingTime()
+        {
+            object expectedState = new object();
+            object triggeredState = null;
+            using var timer = clock.CreateTimer(
+                state => triggeredState = state,
+                state: expectedState,
+                dueTime: 5,
+                period: 2);
+
+            clock.SetNow(clock.Now.AddMilliseconds(5));
+            Assert.Same(expectedState, triggeredState);
+        }
+
+        [Fact]
+        public void TimerChange_ResetTimer()
+        {
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 000));
+
+            int triggeredCount = 0;
+            using var timer = clock.CreateTimer(
+                _ => triggeredCount++,
+                state: null,
+                dueTime: 5,
+                period: 2);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 004));
+            Assert.Equal(0, triggeredCount);
+
+            timer.Change(2, 4);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 005));
+            Assert.Equal(0, triggeredCount);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 006));
+            Assert.Equal(1, triggeredCount);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 007));
+            Assert.Equal(1, triggeredCount);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 008));
+            Assert.Equal(1, triggeredCount);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 009));
+            Assert.Equal(1, triggeredCount);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 010));
+            Assert.Equal(2, triggeredCount);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 013));
+            Assert.Equal(2, triggeredCount);
+
+            clock.SetNow(new DateTime(2019, 10, 03, 08, 00, 00, 014));
+            Assert.Equal(3, triggeredCount);
+        }
+
     }
 }
