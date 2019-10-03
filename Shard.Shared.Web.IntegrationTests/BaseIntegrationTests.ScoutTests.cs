@@ -46,7 +46,6 @@ namespace Shard.Shared.Web.IntegrationTests
             var unit = await GetScout(await CreateNewUserPath());
             Assert.NotNull(unit["system"]);
             Assert.Equal(JTokenType.String, unit["system"].Type);
-            var systemName = unit["system"].Value<string>();
         }
 
         [Fact]
