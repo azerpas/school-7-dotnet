@@ -121,7 +121,12 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.Equal(currentSystem, location["system"].Value<string>());
             Assert.Equal(destinationPlanet, location["planet"].Value<string>());
 
-            IDictionary<string, JToken> resources = location["resourcesQuantity"].Value<JObject>();
+            AssertResourcesQuantity(location);
+        }
+
+        private static void AssertResourcesQuantity(JObject data)
+        {
+            IDictionary<string, JToken> resources = data["resourcesQuantity"].Value<JObject>();
             Assert.NotNull(resources);
 
             foreach (var key in resources.Keys)
