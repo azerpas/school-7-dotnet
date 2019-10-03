@@ -32,7 +32,9 @@ namespace Shard.Shared.Web.IntegrationTests
             using var unitsResponse = await client.GetAsync($"{userPath}/units");
             await unitsResponse.AssertSuccessStatusCode();
 
-            var units = await unitsResponse.Content.ReadAsAsync<JArray>();
+            var units = (await unitsResponse.Content.ReadAsAsync<JArray>())
+                .Where(unit => unit["type"].Value<string>() == "scout")
+                .ToArray();
             Assert.Single(units);
             return units[0].Value<JObject>();
         }
