@@ -101,7 +101,8 @@ namespace Shard.Shared.Web.IntegrationTests
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
             {
                 builderId = builder["id"].Value<string>(),
-                type = "mine"
+                type = "mine",
+                resourceCategory = "solid"
             });
             await response.AssertSuccessStatusCode();
 
@@ -121,13 +122,54 @@ namespace Shard.Shared.Web.IntegrationTests
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
             {
                 builderId = builder["id"].Value<string>(),
-                type = "mine"
+                type = "mine",
+                resourceCategory = "solid"
             });
             await response.AssertSuccessStatusCode();
 
             var building = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(builder["system"].Value<string>(), building["system"].Value<string>());
             Assert.Equal(builder["planet"].Value<string>(), building["planet"].Value<string>());
+        }
+
+        [Theory]
+        [Trait("grading", "true")]
+        [Trait("version", "4")]
+        [InlineData("solid")]
+        [InlineData("liquid")]
+        [InlineData("gaseous")]
+        public async Task BuildingMineOfGivenResourceKindReturnsMineWithGivenResourceKind(string resourceCategory)
+        {
+            using var client = factory.CreateClient();
+            var (userPath, builder) = await SendUnitToPlanet(client, "builder");
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
+            {
+                builderId = builder["id"].Value<string>(),
+                type = "mine",
+                resourceCategory
+            });
+            await response.AssertSuccessStatusCode();
+
+            var building = await response.Content.ReadAsAsync<JObject>();
+            Assert.Equal(resourceCategory, building["resourceCategory"].Value<string>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "4")]
+        public async Task BuildingMineOfInvalidResourceKindReturns400()
+        {
+            using var client = factory.CreateClient();
+            var (userPath, builder) = await SendUnitToPlanet(client, "builder");
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
+            {
+                builderId = builder["id"].Value<string>(),
+                type = "mine",
+                resourceCategory = "carbon"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.BadRequest);
         }
 
         [Fact]
@@ -153,7 +195,8 @@ namespace Shard.Shared.Web.IntegrationTests
             var response = await client.PostAsJsonAsync($"{userPath}x/buildings", new
             {
                 builderId = builder["id"].Value<string>(),
-                type = "mine"
+                type = "mine",
+                resourceCategory = "solid"
             });
             await response.AssertStatusEquals(HttpStatusCode.NotFound);
         }
