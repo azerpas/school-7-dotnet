@@ -133,6 +133,29 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.Equal(builder["planet"].Value<string>(), building["planet"].Value<string>());
         }
 
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task CanBuildStarportOnPlanet()
+        {
+            using var client = CreateClient();
+            var (userPath, builder) = await SendUnitToPlanet(client, "builder");
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
+            {
+                builderId = builder["id"].Value<string>(),
+                type = "starport",
+                resourceCategory = "solid"
+            });
+            await response.AssertSuccessStatusCode();
+
+            var building = await response.Content.ReadAsAsync<JObject>();
+            Assert.NotNull(building["id"].Value<string>());
+            Assert.Equal("starport", building["type"].Value<string>());
+            Assert.Equal(builder["system"].Value<string>(), building["system"].Value<string>());
+            Assert.Equal(builder["planet"].Value<string>(), building["planet"].Value<string>());
+        }
+
         [Theory]
         [Trait("grading", "true")]
         [Trait("version", "4")]
