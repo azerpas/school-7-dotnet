@@ -49,10 +49,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock.TaskTracking
 
         private AsyncTrackingSyncContext()
         {
-            innerContext = Current;
-
-            if (innerContext == null)
-                throw new InvalidOperationException("SynchronizationContext.Current cannot be null");
+            innerContext = Current ?? new SynchronizationContext();
         }
 
         public override void OperationCompleted()
