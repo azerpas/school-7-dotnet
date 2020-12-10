@@ -32,9 +32,20 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             public async Task TriggerAsync()
             {
                 taskCompletionSource.SetResult(this);
-                // We want to ensure all tasks ready to start 
-                // are triggered before we move on
-                await asyncTestSyncContext.WaitForCompletionAsync();
+
+                /* We want to ensure all tasks ready to start are triggered before we move on
+                 * 
+                 * The reasoning was to allow to any pending thread a reasonable amount of time to react to the
+                 * task being completed. However in some cases, some handler blocks (often because of an error 
+                 * or a race condition).
+                 * 
+                 * Instead of breaking every tests(and consuming all CI credits), we allow a maximum of two
+                 * seconds before moving forward.
+                 */
+
+                await Task.WhenAny(
+                    asyncTestSyncContext.WaitForCompletionAsync(),
+                    Task.Delay(2000));
             }
         }
     }
