@@ -18,6 +18,7 @@ compile:
   stage: compile
   script:
     - dotnet build shard.sln
+  
   artifacts:
     name: "$CI_COMMIT_REF_NAME"
     paths: 
@@ -26,6 +27,8 @@ compile:
 .test:
   stage: test
   allow_failure: true
+  when: delayed
+  start_in: 2 m
   timeout: 10 m
   script:
     - dotnet test --logger trx --filter "$TEST_FILTER" shard.sln
@@ -51,6 +54,8 @@ test:full:
 test:coverage:
   stage: test
   allow_failure: true
+  when: delayed
+  start_in: 2 m
   timeout: 10 m
   before_script:
     - dotnet tool install -g dotnet-reportgenerator-globaltool
