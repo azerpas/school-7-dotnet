@@ -33,7 +33,7 @@ computeQuality() {
     qualityPercentage=$(makePercentage $qualityRate)
 
     printf "Coefficient de qualité = $qualityPercentage%%\n\n" >> report.md
-    makeBadge "qualite" "$qualityPercentage%25" "blue"
+    makeBadge "qualite" "$qualityPercentage%25"
 
     echo $qualityRate
 }
@@ -93,7 +93,7 @@ computeCompletion() {
     complete=$(processHalfGrade "$completeRate*10" "completude" "organge")
 
     completePercentage=$(makePercentage $completeRate)
-    makeBadge "completude" "$completePercentage%25" "red"
+    makeBadge "completude" "$completePercentage%25"
 
     echo $complete
 }
@@ -124,7 +124,7 @@ computeTotal() {
     printf "Impact qualité: $qualityPercentage%%\n\n" >> report.md
     printf "Total: $total/20 \n\n" >> report.md
 
-    makeBadge "note" "$total%2F20" "red"
+    makeBadge "note" "$total%2F20"
 }
 
 makeGrade() {
