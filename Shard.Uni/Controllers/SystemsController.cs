@@ -8,8 +8,9 @@ using Shard.Uni.Services;
 
 namespace Shard.Uni.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
-    public class SystemsController : Controller
+    public class SystemsController : ControllerBase
     {
 
         private readonly SectorService _sectorService;
@@ -19,36 +20,79 @@ namespace Shard.Uni.Controllers
             _sectorService = sectorService;
         }
 
-        // GET: api/values
+        // GET: /Systems
         [HttpGet]
-        public List<PlanetarySystem> Get()
+        public List<StarSystem> Get()
         {
             return _sectorService.Systems;
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET /Systems/{systemName}
+        [HttpGet("{systemName}")]
+        public ActionResult<StarSystem> Get(string systemName)
         {
-            return "value";
+            StarSystem system = _sectorService.Systems.Find(System => System.Name == systemName);
+            if (system == null)
+            {
+                return NotFound();
+            }
+                
+            return system;
         }
 
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // GET /Systems/{systemName}/planets
+        [HttpGet("{systemName}")]
+        public ActionResult<List<Planet>> GetPlanets(string systemName)
         {
+            StarSystem system = _sectorService.Systems.Find(System => System.Name == systemName);
+            if (system == null)
+            {
+                return NotFound();
+            }
+            return system.Planets;
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // GET /Systems/{systemName}/planets/{planetName}
+        [HttpGet("{systemName}/planets/{planetName}")]
+        public ActionResult<Planet> GetPlanet(string systemName, string planetName)
         {
+            StarSystem system = _sectorService.Systems.Find(System => System.Name == systemName);
+            if (system == null)
+            {
+                return NotFound("System not found");
+            }
+            Planet planet = system.Planets.Find(Planet => Planet.Name == planetName);
+            if (planet == null)
+            {
+                return NotFound("Planet not found");
+            }
+            return planet;
         }
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        /*
+         * ----------
+         * GetPlanet: en une seule requête
+         * ---------- 
+        // GET /Systems/{systemName}/planets?name={planetName}
+        [HttpGet("{systemName}")]
+        public ActionResult<Planet> GetPlanet([FromUri] string systemName, [FromQuery] string planetName)
         {
+            StarSystem system = _sectorService.Systems.Find(System => System.Name == systemName);
+            if (system == null)
+            {
+                return NotFound("System not found");
+            }
+            if(planetName != null)
+            {
+                Planet planet = system.Planets.Find(Planet => Planet.Name == planetName);
+                if (planet == null)
+                {
+                    return NotFound("Planet not found");
+                }
+                return planet;
+            }
+            
         }
+        */
     }
 }
