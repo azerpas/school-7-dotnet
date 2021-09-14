@@ -41,7 +41,7 @@ namespace Shard.Uni.Controllers
         }
 
         // GET /Systems/{systemName}/planets
-        [HttpGet("{systemName}")]
+        [HttpGet("{systemName}/planets")]
         public ActionResult<List<Planet>> GetPlanets(string systemName)
         {
             StarSystem system = _sectorService.Systems.Find(System => System.Name == systemName);
