@@ -12,7 +12,8 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchUrl": "Systems",
+      "hotReloadProfile": "aspnetcore",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -20,7 +21,8 @@
     "Shard.Uni": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchUrl": "Systems",
+      "hotReloadProfile": "aspnetcore",
       "applicationUrl": "https://localhost:34875;http://localhost:46715",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
