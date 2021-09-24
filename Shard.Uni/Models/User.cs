@@ -3,14 +3,15 @@ namespace Shard.Uni.Models
 {
     public class User
     {
-        private string id { get; }
-        private string pseudo { get; }
-        private string dateOfCreation { get; }
+        public string Id { get; }
+        public string Pseudo { get; }
+        public string DateOfCreation { get; }
+
         public User(string id, string pseudo)
         {
-            this.id = id;
-            this.pseudo = pseudo;
-            this.dateOfCreation = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:sssK");
+            Id = id;
+            Pseudo = pseudo;
+            DateOfCreation = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:sssK");
         }
     }
 }

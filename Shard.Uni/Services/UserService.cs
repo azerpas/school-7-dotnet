@@ -1,0 +1,16 @@
+﻿using Shard.Uni.Models;
+using System.Collections.Generic;
+
+namespace Shard.Uni.Services
+{
+    public class UserService
+    {
+        public List<User> Users { get; set; } = new();
+
+        public UserService()
+        {
+            Users = new List<User>();
+        }
+    }
+}
+

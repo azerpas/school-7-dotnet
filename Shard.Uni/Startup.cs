@@ -32,6 +32,7 @@ namespace Shard.Uni
             services.AddSingleton<MapGenerator>();
             services.Configure<MapGeneratorOptions>(options => options.Seed = "Uni");
             services.AddSingleton<SectorService>();
+            services.AddSingleton<UserService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
