@@ -1,4 +1,4 @@
-image: mcr.microsoft.com/dotnet/core/sdk:3.1-buster
+image: mcr.microsoft.com/dotnet/sdk:5.0
 
 include:
   - project: 'edouard-paumier/student-ci'
@@ -18,7 +18,7 @@ compile:
   stage: compile
   script:
     - dotnet build shard.sln
-  
+  interruptible: true
   artifacts:
     name: "$CI_COMMIT_REF_NAME"
     paths: 
@@ -28,8 +28,9 @@ compile:
   stage: test
   allow_failure: true
   when: delayed
-  start_in: 2 m
-  timeout: 10 m
+  start_in: 1 day
+  interruptible: true
+  timeout: 3 minutes
   script:
     - dotnet test --logger trx --filter "$TEST_FILTER" shard.sln
   after_script:
@@ -55,8 +56,9 @@ test:coverage:
   stage: test
   allow_failure: true
   when: delayed
-  start_in: 2 m
-  timeout: 10 m
+  start_in: 1 day
+  interruptible: true
+  timeout: 3 minutes
   before_script:
     - dotnet tool install -g dotnet-reportgenerator-globaltool
   script:
