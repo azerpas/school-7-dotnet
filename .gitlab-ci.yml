@@ -30,7 +30,7 @@ compile:
   when: delayed
   start_in: 1 day
   interruptible: true
-  timeout: 5 minutes
+  timeout: 3 minutes
   script:
     - dotnet test --logger trx --filter "$TEST_FILTER" shard.sln
   after_script:
@@ -58,7 +58,7 @@ test:coverage:
   when: delayed
   start_in: 1 day
   interruptible: true
-  timeout: 5 minutes
+  timeout: 3 minutes
   before_script:
     - dotnet tool install -g dotnet-reportgenerator-globaltool
   script:
