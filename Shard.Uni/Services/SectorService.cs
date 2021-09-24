@@ -14,11 +14,14 @@ namespace Shard.Uni.Services
         {
             var sectorSpecification = generator.Generate();
             Systems = sectorSpecification.Systems.ToList()
-                .Select(
-                    System => new StarSystem(
+                .Select(                                // For each system...       (of the sector)
+                    System => new StarSystem(           // Create a new object from our StarSystem constructor
                         System.Name,
-                        System.Planets.Select(
-                            Planet => new Planet(Planet.Name, Planet.Size)
+                        System.Planets.Select(          // For each planet...       (of the system)
+                            Planet => new Planet(       // Create a new object from our Planet constructor
+                                Planet.Name,
+                                Planet.Size
+                            )
                         ).ToList()
                     )
                 ).ToList();
