@@ -18,7 +18,16 @@ namespace Shard.Uni.Services
                     System => new StarSystem(
                         System.Name,
                         System.Planets.Select(
-                            Planet => new Planet(Planet.Name, Planet.Size)
+                            Planet => new Planet(
+                                Planet.Name,
+                                Planet.Size,
+                                Planet.ResourceQuantity.Select(
+                                    Resource => Resource // Select the current resource
+                                ).ToDictionary(
+                                    Resource => Resource.Key, // Set the Key
+                                    Resource => Resource.Value // Set the Value
+                                )
+                            )
                         ).ToList()
                     )
                 ).ToList();

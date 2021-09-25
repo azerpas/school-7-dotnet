@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Shard.Uni.Services;
 using Shard.Uni.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace Shard.Uni.Controllers
 {

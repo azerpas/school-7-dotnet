@@ -6,10 +6,12 @@ namespace Shard.Uni.Services
     public class UserService
     {
         public List<User> Users { get; set; } = new();
+        public Dictionary<string, List<Unit>> Units { get; set; } = new();
 
         public UserService()
         {
             Users = new List<User>();
+            Units = new Dictionary<string, List<Unit>>();
         }
     }
 }
