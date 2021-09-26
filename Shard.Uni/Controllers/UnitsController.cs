@@ -11,10 +11,12 @@ namespace Shard.Uni.Controllers
     {
 
         private UserService _userService;
+        private readonly SectorService _sectorService;
 
-        public UnitsController(UserService userService)
+        public UnitsController(UserService userService, SectorService sectorService)
         {
             _userService = userService;
+            _sectorService = sectorService;
         }
 
         // GET /Users/{userId}/Units
@@ -41,6 +43,32 @@ namespace Shard.Uni.Controllers
             }  
         }
 
+        // PUT /Users/{userId}/Units/{unitId}
+        [HttpPut("{userId}/Units/{unitId}")]
+        public ActionResult<Unit> Put(string userId, string unitId, Unit unit)
+        {
+            List<Unit> units = _userService.Units[userId];
+
+            if (unitId != unit.Id)
+            {
+                return BadRequest();
+            }
+
+            Unit unt = units.Find(Unit => Unit.Id == unitId);
+
+            if (unt == null)
+            {
+                _userService.Units[userId].Add(unit);
+            }
+            else
+            {
+                Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                _userService.Units[userId].Remove(oldUnit);
+                _userService.Units[userId].Add(unit);
+            }
+            return unit;
+        }
+
         // GET /Users/{userId}/Units/{unitId}/locations
         [HttpGet("{userId}/Units/{unitId}/locations")]
         public ActionResult<Unit> GetLocations(string userId, string unitId)
@@ -53,8 +81,14 @@ namespace Shard.Uni.Controllers
             }
             else
             {
-                // TODO: resourcesQuantity { additionalProp1: ... } 
-                return Ok(new { system = unit.System, planet = unit.Planet });
+                Planet planet = _sectorService
+                    .Systems.Find(System => System.Name == unit.System)
+                    .Planets.Find(Planet => Planet.Name == unit.Planet);
+                return Ok(new {
+                    system = unit.System,
+                    planet = unit.Planet,
+                    resourcesQuantity = planet.ResourceQuantity
+                });
             }
         }
     }

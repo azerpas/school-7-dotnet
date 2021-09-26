@@ -17,4 +17,16 @@ namespace Shard.Uni.Models
             ResourceQuantity = resourceQuantity;
         }
     }
+
+    public class PlanetDetailDto
+    {
+        public string Name { get; set; }
+        public int Size { get; set; }
+
+        public PlanetDetailDto(string name, int size)
+        {
+            Name = name;
+            Size = size;
+        }
+    }
 }

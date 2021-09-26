@@ -14,4 +14,16 @@ namespace Shard.Uni.Models
             Planets = planets;
         }
     }
+
+    public class StarSystemPlanetDetailDto
+    {
+        public string Name { get; set; }
+        public List<PlanetDetailDto> Planets { get; set; }
+
+        public StarSystemPlanetDetailDto(string name, List<PlanetDetailDto> planets)
+        {
+            Name = name;
+            Planets = planets;
+        }
+    }
 }

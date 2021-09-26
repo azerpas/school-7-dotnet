@@ -33,5 +33,21 @@ namespace Shard.Uni.Services
                 ).ToList();
         }
 
+        /**
+         * This method return a StarSystem without its Planets resources
+         */
+        public List<StarSystemPlanetDetailDto> GetSystems()
+        {
+            return Systems.Select(System =>
+                new StarSystemPlanetDetailDto(
+                    System.Name,
+                    System.Planets.Select(Planet =>
+                        new PlanetDetailDto(
+                            Planet.Name,
+                            Planet.Size)
+                        ).ToList()
+                )
+            ).ToList();
+        }
     }
 }
