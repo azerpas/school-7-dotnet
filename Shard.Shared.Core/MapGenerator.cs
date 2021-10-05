@@ -9,7 +9,7 @@ namespace Shard.Shared.Core
 {
     public class MapGenerator
     {
-        private readonly string seed;
+        private readonly string? seed;
 
         public static MapGenerator Random => new(new MapGeneratorOptions());
 
