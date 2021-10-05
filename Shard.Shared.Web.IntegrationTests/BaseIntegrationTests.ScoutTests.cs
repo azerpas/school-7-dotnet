@@ -123,6 +123,7 @@ namespace Shard.Shared.Web.IntegrationTests
             using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
             {
                 id = unitId,
+                type = "scout",
                 system = destinationSystem
             });
             await response.AssertSuccessStatusCode();
@@ -161,6 +162,7 @@ namespace Shard.Shared.Web.IntegrationTests
             using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
             {
                 id = unitId,
+                type = "scout",
                 system = currentSystem,
                 planet = destinationPlanet
             });
@@ -204,6 +206,7 @@ namespace Shard.Shared.Web.IntegrationTests
             using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
             {
                 id = unitId,
+                type = "scout",
                 system = currentSystem,
                 planet = destinationPlanet
             });
