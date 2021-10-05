@@ -2,6 +2,8 @@
 using Shard.Uni.Services;
 using Shard.Uni.Models;
 using System.Collections.Generic;
+using Shard.Shared.Core;
+using System.Linq;
 
 namespace Shard.Uni.Controllers
 {
@@ -45,11 +47,11 @@ namespace Shard.Uni.Controllers
 
         // PUT /Users/{userId}/Units/{unitId}
         [HttpPut("{userId}/Units/{unitId}")]
-        public ActionResult<Unit> Put(string userId, string unitId, Unit unit)
+        public ActionResult<Unit> Put(string userId, string unitId, Unit spaceship)
         {
             List<Unit> units = _userService.Units[userId];
 
-            if (unitId != unit.Id)
+            if (unitId != spaceship.Id)
             {
                 return BadRequest();
             }
@@ -58,19 +60,19 @@ namespace Shard.Uni.Controllers
 
             if (unt == null)
             {
-                _userService.Units[userId].Add(unit);
+                _userService.Units[userId].Add(spaceship);
             }
             else
             {
                 Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
                 _userService.Units[userId].Remove(oldUnit);
-                _userService.Units[userId].Add(unit);
+                _userService.Units[userId].Add(spaceship);
             }
-            return unit;
+            return spaceship;
         }
 
-        // GET /Users/{userId}/Units/{unitId}/locations
-        [HttpGet("{userId}/Units/{unitId}/locations")]
+        // GET /Users/{userId}/Units/{unitId}/location
+        [HttpGet("{userId}/Units/{unitId}/location")]
         public ActionResult<Unit> GetLocations(string userId, string unitId)
         {
             List<Unit> units = _userService.Units[userId];
@@ -84,10 +86,14 @@ namespace Shard.Uni.Controllers
                 Planet planet = _sectorService
                     .Systems.Find(System => System.Name == unit.System)
                     .Planets.Find(Planet => Planet.Name == unit.Planet);
+                // Setting the Key to lower because of the test verification :
+                // https://gitlab.com/efrei-p2023/efrei-p2023-csharp/-/blob/v2/Shard.Shared.Web.IntegrationTests/BaseIntegrationTests.ScoutTests.cs#L225-235
+                Dictionary<string, int> resources = planet.ResourceQuantity
+                    .ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
                 return Ok(new {
                     system = unit.System,
                     planet = unit.Planet,
-                    resourcesQuantity = planet.ResourceQuantity
+                    resourcesQuantity = resources
                 });
             }
         }
