@@ -3,6 +3,9 @@ using Shard.Shared.Core;
 
 namespace Shard.Uni.Models
 {
+    /**
+     * Class reprensenting a Planet
+     */
     public class Planet
     {
         public string Name { get; }
