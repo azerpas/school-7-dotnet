@@ -65,31 +65,5 @@ namespace Shard.Uni.Controllers
             }
             return planet;
         }
-
-        /*
-         * ----------
-         * GetPlanet: en une seule requête
-         * ---------- 
-        // GET /Systems/{systemName}/planets?name={planetName}
-        [HttpGet("{systemName}")]
-        public ActionResult<Planet> GetPlanet([FromUri] string systemName, [FromQuery] string planetName)
-        {
-            StarSystem system = _sectorService.Systems.Find(System => System.Name == systemName);
-            if (system == null)
-            {
-                return NotFound("System not found");
-            }
-            if(planetName != null)
-            {
-                Planet planet = system.Planets.Find(Planet => Planet.Name == planetName);
-                if (planet == null)
-                {
-                    return NotFound("Planet not found");
-                }
-                return planet;
-            }
-            
-        }
-        */
     }
 }
