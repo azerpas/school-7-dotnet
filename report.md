@@ -15,25 +15,31 @@ Coefficient de qualité = 87.5%
 
 ## Versions
 
+### Version 1
+
+* Total: 8
+* Succès: 8
+* Taux: 1
+
 ### Total rendus
 
-**Aucun test de version**
+Taux moyen = 1
 
-Taux moyen = 0
-
-Note intermédiaire = 0/10
+Note intermédiaire = 10/10
 
 ## Rendu complet
 
-**Aucun test complet**
+* Total: 10
+* Succès: 10
+* Taux: 1
 
-Note intermédiaire = 0/10
+Note intermédiaire = 10/10
 
 ## Total 
 
-Sous-total: 0/20 
+Sous-total: 20/20 
 
 Impact qualité: 93.75%
 
-Total: 0/20 
+Total: 18.75/20 
 
