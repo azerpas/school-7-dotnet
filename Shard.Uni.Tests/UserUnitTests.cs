@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Shard.Uni.Models;
 using Shard.Uni.Services;
 using Xunit;
+using Shard.Shared.Core;
 
 namespace Shard.Uni.Tests
 {
@@ -12,20 +13,20 @@ namespace Shard.Uni.Tests
         UserService _userService;
         SectorService _sectorService;
 
-        public UserUnitTests(UserService userService, SectorService sectorService)
+        public UserUnitTests()
         {
-            _userService = userService;
-            _sectorService = sectorService;
+            _userService = new UserService();
+            _sectorService = new SectorService(new MapGenerator(new MapGeneratorOptions { Seed = "Uni" }));
         }
 
-        [Fact(Skip = "No yet implemented")]
+        [Fact]
         public void NoUsersOnStartUp()
         {
             List<User> users = _userService.Users;
             Assert.Equal(users,new List<User>());
         }
 
-        [Fact(Skip = "No yet implemented")]
+        [Fact]
         public void UserGenerated()
         {
             string uuid = Guid.NewGuid().ToString();

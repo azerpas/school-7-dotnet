@@ -11,12 +11,12 @@ namespace Shard.Uni.Tests
     {
         SectorService _sectorService;
 
-        public SectorUnitTests(SectorService sectorService)
+        public SectorUnitTests()
         {
-            _sectorService = sectorService;
+            _sectorService = new SectorService(new MapGenerator(new MapGeneratorOptions { Seed = "Uni" }));
         }
 
-        [Fact(Skip="No yet implemented")]
+        [Fact]
         public void SystemsContainResources()
         {
             List<StarSystem> systems = _sectorService.Systems;
