@@ -39,6 +39,14 @@ namespace Shard.Uni.Tests
                 }
             }
         }
+
+        [Fact]
+        public void PlanetsExist()
+        {
+            List<StarSystem> systems = _sectorService.Systems;
+            List<Planet> planets = systems.Select(System => System.Planets).SelectMany(Planets => Planets).ToList();
+            Assert.NotEmpty(planets);
+        }
     }
 }
 

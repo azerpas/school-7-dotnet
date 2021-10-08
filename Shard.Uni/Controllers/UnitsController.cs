@@ -73,7 +73,7 @@ namespace Shard.Uni.Controllers
 
         // GET /Users/{userId}/Units/{unitId}/location
         [HttpGet("{userId}/Units/{unitId}/location")]
-        public ActionResult<Unit> GetLocations(string userId, string unitId)
+        public ActionResult<UnitLocationDetailDto> GetLocations(string userId, string unitId)
         {
             List<Unit> units = _userService.Units[userId];
             Unit unit = units.Find(Unit => Unit.Id == unitId);
@@ -88,13 +88,8 @@ namespace Shard.Uni.Controllers
                     .Planets.Find(Planet => Planet.Name == unit.Planet);
                 // Setting the Key to lower because of the test verification :
                 // https://gitlab.com/efrei-p2023/efrei-p2023-csharp/-/blob/v2/Shard.Shared.Web.IntegrationTests/BaseIntegrationTests.ScoutTests.cs#L225-235
-                Dictionary<string, int> resources = planet.ResourceQuantity
-                    .ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
-                return Ok(new {
-                    system = unit.System,
-                    planet = unit.Planet,
-                    resourcesQuantity = resources
-                });
+                UnitLocationDetailDto unitLocation = new UnitLocationDetailDto(unit.System, planet);
+                return unitLocation;
             }
         }
     }
