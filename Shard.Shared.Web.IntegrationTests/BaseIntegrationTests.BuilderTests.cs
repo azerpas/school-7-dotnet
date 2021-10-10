@@ -226,8 +226,8 @@ namespace Shard.Shared.Web.IntegrationTests
         [Fact]
         [Trait("grading", "true")]
         [Trait("version", "3")]
-        public Task GetBuilder_IfMoreThan2secAway_Waits()
-            => GetUnit_IfMoreThan2secAway_Waits("builder");
+        public Task GetBuilder_IfMoreThan2secAway_DoesNotWait()
+            => GetUnit_IfMoreThan2secAway_DoesNotWait("builder");
 
         [Fact]
         [Trait("grading", "true")]
