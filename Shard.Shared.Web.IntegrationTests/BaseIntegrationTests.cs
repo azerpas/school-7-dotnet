@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Hosting; 
 using Microsoft.AspNetCore.Mvc.Testing; 
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration; 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging; 
+using Shard.Shared.Core;
+using Shard.Shared.Web.IntegrationTests.Clock;
 using Xunit; 
 using Xunit.Abstractions; 
 using System.Linq; 
@@ -14,6 +18,7 @@ namespace Shard.Shared.Web.IntegrationTests
         where TWebApplicationFactory: WebApplicationFactory<TEntryPoint> 
     { 
         private readonly WebApplicationFactory<TEntryPoint> factory; 
+        private readonly FakeClock fakeClock = new FakeClock();
  
         public BaseIntegrationTests(TWebApplicationFactory factory, ITestOutputHelper testOutputHelper) 
         { 
@@ -23,6 +28,11 @@ namespace Shard.Shared.Web.IntegrationTests
                     builder.ConfigureAppConfiguration(RemoveAllReloadOnChange); 
                     builder.ConfigureLogging( 
                         logging => logging.AddProvider(new XunitLoggerProvider(testOutputHelper))); 
+
+                    builder.ConfigureTestServices(services =>
+                    {
+                        services.AddSingleton<IClock>(fakeClock);	
+                    });
                 }); 
         } 
  

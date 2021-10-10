@@ -74,10 +74,12 @@ namespace Shard.Shared.Web.IntegrationTests
             using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
             {
                 id = unitId,
-                system = currentSystem,
-                planet = destinationPlanet
+                destinationSystem = currentSystem,
+                destinationPlanet
             });
             await moveResponse.AssertSuccessStatusCode();
+
+            fakeClock.Advance(new TimeSpan(0, 0, 15));
 
             using var scoutingResponse = await client.GetAsync($"{userPath}/units/{unitId}/location");
             await scoutingResponse.AssertSuccessStatusCode();

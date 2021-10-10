@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
+using Shard.Shared.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,10 +107,12 @@ namespace Shard.Shared.Web.IntegrationTests
             {
                 id = unitId,
                 type = "scout",
-                system = currentSystem,
-                planet = destinationPlanet
+                destinationSystem = currentSystem,
+                destinationPlanet
             });
             await moveResponse.AssertSuccessStatusCode();
+
+            fakeClock.Advance(new TimeSpan(0, 0, 15));
 
             using var scoutingResponse = await client.GetAsync($"{userPath}/units/{unitId}/location");
             await scoutingResponse.AssertSuccessStatusCode();

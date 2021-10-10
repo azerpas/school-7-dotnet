@@ -24,14 +24,16 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             events.TryAdd(anEvent, anEvent);
         }
 
-        private DateTime now;
-        public DateTime Now => now;
+        public DateTime Now { get; private set; }
 
         public void SetNow(DateTime now)
         {
             TriggerEventsUpTo(now);
-            this.now = now;
+            Now = now;
         }
+
+        public void Advance(TimeSpan timeSpan)
+            => SetNow(Now + timeSpan);
 
         private void TriggerEventsUpTo(DateTime now)
         {
@@ -50,7 +52,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             if (eventToTrigger == null || !events.TryRemove(eventToTrigger, out _))
                 return false;
 
-            this.now = eventToTrigger.TriggerTime;
+            this.Now = eventToTrigger.TriggerTime;
             eventToTrigger.Trigger();
             return true;
         }
