@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -9,7 +7,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
 {
     public class FakeClockTests
     {
-        private readonly FakeClock clock = new FakeClock();
+        private readonly FakeClock clock = new();
 
         [Fact]
         public async Task SetNow_RetainsValue()
@@ -304,7 +302,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
         [Fact]
         public async Task CreateTimer_StateIsPassedWhenReachingTime()
         {
-            object expectedState = new object();
+            object expectedState = new();
             object triggeredState = null;
             using var timer = clock.CreateTimer(
                 state => triggeredState = state,

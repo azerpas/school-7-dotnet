@@ -28,7 +28,6 @@ namespace Shard.Shared.Web.IntegrationTests
 
             return "users/" + userId;
         }
-
         private Task<JObject> GetScout(string userPath)
             => GetSingleUnitOfType(userPath, "scout");
 
@@ -117,17 +116,11 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.Equal(currentSystem, location["system"].Value<string>());
             Assert.Equal(destinationPlanet, location["planet"].Value<string>());
 
-
-
             AssertResourcesQuantity(location);
         }
 
-
-
         private static void AssertResourcesQuantity(JObject data)
-
         {
-
             IDictionary<string, JToken> resources = data["resourcesQuantity"].Value<JObject>();
             Assert.NotNull(resources);
 
@@ -144,7 +137,6 @@ namespace Shard.Shared.Web.IntegrationTests
                     "oxygen",
                 });
             }
-
         }
 
         [Fact]

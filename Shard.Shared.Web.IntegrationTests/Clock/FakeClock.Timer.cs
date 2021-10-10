@@ -84,6 +84,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             public void Dispose()
             {
                 clock.TryRemoveEvent(this);
+                GC.SuppressFinalize(this);
             }
 
             public ValueTask DisposeAsync()

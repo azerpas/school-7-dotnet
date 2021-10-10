@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,7 +43,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock.TaskTracking
         void SetCurrentAsSynchronizationContext() => SetSynchronizationContext(this);
 
 
-        readonly AsyncManualResetEvent @event = new AsyncManualResetEvent(true);
+        readonly AsyncManualResetEvent @event = new(true);
         readonly SynchronizationContext innerContext;
         int operationCount;
 

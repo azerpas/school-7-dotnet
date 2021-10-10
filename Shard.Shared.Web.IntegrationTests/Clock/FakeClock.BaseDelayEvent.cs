@@ -14,7 +14,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
 
             public Task Task => taskCompletionSource.Task;
 
-            public BaseDelayEvent(CancellationToken cancellationToken, AsyncTrackingSyncContext asyncTestSyncContext)
+            public BaseDelayEvent(AsyncTrackingSyncContext asyncTestSyncContext, CancellationToken cancellationToken)
             {
                 taskCompletionSource = new TaskCompletionSource<object>();
                 cancellationToken.Register(

@@ -13,7 +13,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
 {
     public partial class FakeClock : IClock
     {
-        private AsyncTrackingSyncContext asyncTestSyncContext;
+        private readonly AsyncTrackingSyncContext asyncTestSyncContext;
         
         public FakeClock()
         {
@@ -25,9 +25,8 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             public DateTime TriggerTime { get; }
             public Task TriggerAsync();
         }
-        
-        private readonly ConcurrentDictionary<IEvent, IEvent> events
-            = new ConcurrentDictionary<IEvent, IEvent>();
+
+        private readonly ConcurrentDictionary<IEvent, IEvent> events = new();
 
         private void AddEvent(IEvent anEvent)
             => events.TryAdd(anEvent, anEvent);
@@ -104,13 +103,13 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             if (delay.TotalMilliseconds < 0)
                 throw new ArgumentOutOfRangeException(nameof(delay), "cannot be negative except -1 ms");
 
-            var delayEvent = new DelayEvent(Now + delay, cancellationToken, asyncTestSyncContext);
+            var delayEvent = new DelayEvent(Now + delay, asyncTestSyncContext, cancellationToken);
             AddEvent(delayEvent);
             return delayEvent.Task;
         }
         
         private Task InfiniteDelay(CancellationToken cancellationToken)
-            => new BaseDelayEvent(cancellationToken, asyncTestSyncContext).Task;
+            => new BaseDelayEvent(asyncTestSyncContext, cancellationToken).Task;
 
         public void Sleep(int millisecondsTimeout)
             => Delay(millisecondsTimeout).Wait();

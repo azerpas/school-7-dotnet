@@ -17,7 +17,11 @@ namespace Shard.Shared.Core
         public bool Change(long dueTime, long period) => systemTimer.Change(dueTime, period);
         public bool Change(TimeSpan dueTime, TimeSpan period) => systemTimer.Change(dueTime, period);
         public bool Change(uint dueTime, uint period) => systemTimer.Change(dueTime, period);
-        public void Dispose() => systemTimer.Dispose();
+        public void Dispose()
+        {
+            systemTimer.Dispose();
+            GC.SuppressFinalize(this);
+        }
         public ValueTask DisposeAsync() => systemTimer.DisposeAsync();
     }
 }

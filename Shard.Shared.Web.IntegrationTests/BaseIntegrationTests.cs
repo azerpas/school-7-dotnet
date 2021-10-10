@@ -18,7 +18,7 @@ namespace Shard.Shared.Web.IntegrationTests
         where TWebApplicationFactory: WebApplicationFactory<TEntryPoint> 
     { 
         private readonly WebApplicationFactory<TEntryPoint> factory; 
-        private readonly FakeClock fakeClock = new FakeClock();
+        private readonly FakeClock fakeClock = new();
  
         public BaseIntegrationTests(TWebApplicationFactory factory, ITestOutputHelper testOutputHelper) 
         { 

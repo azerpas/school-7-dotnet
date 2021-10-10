@@ -11,8 +11,8 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
         {
             public DateTime TriggerTime { get; }
 
-            public DelayEvent(DateTime triggerTime, CancellationToken cancellationToken, AsyncTrackingSyncContext asyncTestSyncContext)
-                : base(cancellationToken, asyncTestSyncContext)
+            public DelayEvent(DateTime triggerTime, AsyncTrackingSyncContext asyncTestSyncContext, CancellationToken cancellationToken)
+                : base(asyncTestSyncContext, cancellationToken)
             {
                 TriggerTime = triggerTime;
             }
