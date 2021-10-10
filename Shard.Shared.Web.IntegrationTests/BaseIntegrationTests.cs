@@ -8,7 +8,9 @@ using Shard.Shared.Core;
 using Shard.Shared.Web.IntegrationTests.Clock;
 using Xunit; 
 using Xunit.Abstractions; 
+using Microsoft.AspNetCore.Builder;
 using System.Linq; 
+using System.Threading;
  
 namespace Shard.Shared.Web.IntegrationTests 
 { 
@@ -32,6 +34,7 @@ namespace Shard.Shared.Web.IntegrationTests
                     builder.ConfigureTestServices(services =>
                     {
                         services.AddSingleton<IClock>(fakeClock);	
+                        services.AddSingleton<IStartupFilter>(fakeClock);
                     });
                 }); 
         } 

@@ -5,16 +5,19 @@ using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Shard.Shared.Core;
 using Shard.Shared.Web.IntegrationTests.Clock.TaskTracking;
 using Xunit.Sdk;
 
 namespace Shard.Shared.Web.IntegrationTests.Clock
 {
-    public partial class FakeClock : IClock
+    public partial class FakeClock : IClock, IStartupFilter
     {
         private readonly AsyncTrackingSyncContext asyncTestSyncContext;
-        
+        public AsyncTrackingSyncContext AsyncTestSyncContext => asyncTestSyncContext;
+
         public FakeClock()
         {
             asyncTestSyncContext = AsyncTrackingSyncContext.Setup();
@@ -143,6 +146,25 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             var timer = new Timer(this, callback, state);
             timer.Change(dueTime, period);
             return timer;
+        }
+
+        Action<IApplicationBuilder> IStartupFilter.Configure(Action<IApplicationBuilder> next)
+        {
+            return builder =>
+            {
+                builder.Use(async (context, next) =>
+                {
+                    EnsureIsRunningUnderSynchronizationContext();
+                    await next.Invoke();
+                });
+                next(builder);
+            };
+        }
+
+        private void EnsureIsRunningUnderSynchronizationContext()
+        {
+            if (SynchronizationContext.Current == null)
+                SynchronizationContext.SetSynchronizationContext(asyncTestSyncContext);
         }
     }
 }

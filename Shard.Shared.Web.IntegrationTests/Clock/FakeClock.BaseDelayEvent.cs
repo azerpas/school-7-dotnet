@@ -1,4 +1,4 @@
-﻿using Shard.Shared.Web.IntegrationTests.Clock.TaskTracking;
+using Shard.Shared.Web.IntegrationTests.Clock.TaskTracking;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Sdk;
@@ -16,6 +16,12 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
 
             public BaseDelayEvent(AsyncTrackingSyncContext asyncTestSyncContext, CancellationToken cancellationToken)
             {
+                // If the current delay is being created from within a Task.Run or any other thread that did not inherit 
+                // the synchronization context, ensure the the await that will happen will capture the asyncTestSyncContext
+
+                if (SynchronizationContext.Current == null)
+                    SynchronizationContext.SetSynchronizationContext(asyncTestSyncContext);
+
                 taskCompletionSource = new TaskCompletionSource<object>();
                 cancellationToken.Register(
                     () => taskCompletionSource.TrySetCanceled(cancellationToken));
