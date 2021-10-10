@@ -118,13 +118,19 @@ namespace Shard.Shared.Web.IntegrationTests
 
             var location = await scoutingResponse.Content.ReadAsAsync<JObject>();
             Assert.Equal(currentSystem, location["system"].Value<string>());
-            Assert.Equal(destinationPlanet, location["planet"].Value<string>());
-
+            Assert.Equal(destinationPlanet, location["planet"].Value<string>());
+
+
+
             AssertResourcesQuantity(location);
-        }
-
-        private static void AssertResourcesQuantity(JObject data)
-        {
+        }
+
+
+
+        private static void AssertResourcesQuantity(JObject data)
+
+        {
+
             IDictionary<string, JToken> resources = data["resourcesQuantity"].Value<JObject>();
             Assert.NotNull(resources);
 
@@ -140,7 +146,8 @@ namespace Shard.Shared.Web.IntegrationTests
                     "water",
                     "oxygen",
                 });
-            }
+            }
+
         }
 
         [Fact]
