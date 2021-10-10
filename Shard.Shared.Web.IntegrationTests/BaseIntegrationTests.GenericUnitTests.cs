@@ -156,6 +156,25 @@ namespace Shard.Shared.Web.IntegrationTests
             return (userPath, await afterMoveResponse.Content.ReadAsAsync<JObject>());
         }
 
+        private async Task<(string, JObject)> SendUnitToSpecificPlanet(
+            HttpClient client, string unitType, string destinationSystem, string destinationPlanet)
+        {
+            var userPath = await CreateNewUserPath();
+            var unit = await GetSingleUnitOfType(userPath, unitType);
+            var unitId = unit["id"].Value<string>();
+
+            unit["destinationSystem"] = destinationSystem;
+            unit["destinationPlanet"] = destinationPlanet;
+
+            using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
+            await moveResponse.AssertSuccessStatusCode();
+
+            await fakeClock.Advance(new TimeSpan(0, 1, 15));
+
+            using var afterMoveResponse = await client.GetAsync($"{userPath}/units/{unitId}");
+            return (userPath, await afterMoveResponse.Content.ReadAsAsync<JObject>());
+        }
+
         public async Task GetUnit_IfMoreThan2secAway_DoesNotWait(string unitType)
         {
             using var client = factory.CreateClient();

@@ -158,18 +158,45 @@ namespace Shard.Shared.Web.IntegrationTests
         [Fact]
         [Trait("grading", "true")]
         [Trait("version", "4")]
-        public async Task BuildingMineOfInvalidResourceKindReturns400()
+        public async Task BuildingMineReturnsUnbuiltMineWithExpectedBuildTime()
         {
             using var client = factory.CreateClient();
+            var (_, _, building) = await BuildMine(client);
+            Assert.False(building["isBuilt"].Value<bool>());
+            Assert.Equal(fakeClock.Now.AddMinutes(5), building["estimatedBuildTime"].Value<DateTime>());
+        }
+
+        private async Task<(string, JObject, JObject)> BuildMine(HttpClient client)
+        {
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
             {
                 builderId = builder["id"].Value<string>(),
                 type = "mine",
-                resourceCategory = "carbon"
+                resourceCategory = "solid"
             });
-            await response.AssertStatusEquals(HttpStatusCode.BadRequest);
+            await response.AssertSuccessStatusCode();
+
+            var building = await response.Content.ReadAsAsync<JObject>();
+            return (userPath, builder, building);
+        }
+
+        private async Task<(string, JObject, JObject)> BuildMineOn(HttpClient client, string system, string planet, 
+            string resourceCategory = "solid")
+        {
+            var (userPath, builder) = await SendUnitToSpecificPlanet(client, "builder", system, planet);
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
+            {
+                builderId = builder["id"].Value<string>(),
+                type = "mine",
+                resourceCategory
+            });
+            await response.AssertSuccessStatusCode();
+
+            var building = await response.Content.ReadAsAsync<JObject>();
+            return (userPath, builder, building);
         }
 
         [Fact]
