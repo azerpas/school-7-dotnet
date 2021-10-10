@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -174,6 +176,34 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.NotNull(array.SelectToken("[0].planets[0].size"));
             Assert.Equal(JTokenType.Integer, array.SelectToken("[0].planets[0].size").Type);
             Assert.Equal(JTokenType.Integer, array.SelectToken("[0].planets[0].size").Type);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "4")]
+        public async Task SystemIsFollowingTestSpecifications()
+        {
+            var expectedJson = GetExpectedJson("expectedTestSector.json")?.Replace("\r", string.Empty);
+
+            using var client = factory.CreateClient();
+            using var response = await client.GetAsync("systems");
+            await response.AssertSuccessStatusCode();
+
+            var array = await response.Content.ReadAsAsync<JArray>();
+            Assert.Equal(expectedJson, array.ToString(Formatting.Indented)?.Replace("\r", string.Empty));
+        } 
+ 
+        private static string GetExpectedJson(string fileName)
+        {
+            // We assume test files are under the current assembly 
+            // AND the same namespace (or a child one)
+            var sibblingType = typeof(BaseIntegrationTests<TEntryPoint, TWebApplicationFactory>);
+            var owningAssembly = sibblingType.Assembly;
+            var baseNameSpace = sibblingType.Namespace;
+
+            using var stream = owningAssembly.GetManifestResourceStream(baseNameSpace + "." + fileName);
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

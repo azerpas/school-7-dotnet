@@ -35,6 +35,10 @@ namespace Shard.Shared.Web.IntegrationTests
                     {
                         services.AddSingleton<IClock>(fakeClock);	
                         services.AddSingleton<IStartupFilter>(fakeClock);
+                        services.Configure<MapGeneratorOptions>(options =>
+                        {
+                            options.Seed = "Test application";
+                        });
                     });
                 }); 
         } 
