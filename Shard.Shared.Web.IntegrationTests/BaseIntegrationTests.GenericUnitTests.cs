@@ -67,13 +67,10 @@ namespace Shard.Shared.Web.IntegrationTests
             var currentSystem = unit["system"].Value<string>();
             var destinationSystem = await GetRandomSystemOtherThan(currentSystem);
 
+            unit["destinationSystem"] = destinationSystem;
+
             using var client = factory.CreateClient();
-            using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
-            {
-                id = unitId,
-                type = unitType,
-                destinationSystem
-            });
+            using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
             await response.AssertSuccessStatusCode();
 
             var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
@@ -103,14 +100,11 @@ namespace Shard.Shared.Web.IntegrationTests
             var currentSystem = unit["system"].Value<string>();
             var destinationPlanet = (await GetSomePlanetInSystem(currentSystem));
 
+            unit["destinationSystem"] = currentSystem;
+            unit["destinationPlanet"] = destinationPlanet;
+
             using var client = factory.CreateClient();
-            using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
-            {
-                id = unitId,
-                type = unitType,
-                destinationSystem = currentSystem,
-                destinationPlanet
-            });
+            using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
             await response.AssertSuccessStatusCode();
 
             var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
@@ -143,12 +137,11 @@ namespace Shard.Shared.Web.IntegrationTests
             var currentSystem = unit["system"].Value<string>();
             var destinationPlanet = await GetSomePlanetInSystem(currentSystem);
 
-            using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
-            {
-                id = unitId,
-                destinationSystem = currentSystem,
-                destinationPlanet
-            });
+            unit["destinationSystem"] = currentSystem;
+            unit["destinationPlanet"] = destinationPlanet;
+
+            using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
+            await moveResponse.AssertSuccessStatusCode();
 
             return (userPath, unitId);
         }

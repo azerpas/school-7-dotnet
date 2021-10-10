@@ -101,14 +101,11 @@ namespace Shard.Shared.Web.IntegrationTests
             var currentSystem = unit["system"].Value<string>();
             var destinationPlanet = await GetSomePlanetInSystem(currentSystem);
 
+            unit["destinationSystem"] = currentSystem;
+            unit["destinationPlanet"] = destinationPlanet;
+
             using var client = factory.CreateClient();
-            using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
-            {
-                id = unitId,
-                type = "scout",
-                destinationSystem = currentSystem,
-                destinationPlanet
-            });
+            using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
             await moveResponse.AssertSuccessStatusCode();
 
             await fakeClock.Advance(new TimeSpan(0, 0, 15));
