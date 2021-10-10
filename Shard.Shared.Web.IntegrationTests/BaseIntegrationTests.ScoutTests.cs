@@ -142,5 +142,23 @@ namespace Shard.Shared.Web.IntegrationTests
                 });
             }
         }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "3")]
+        public Task GetScout_IfMoreThan2secAway_Waits()
+            => GetUnit_IfMoreThan2secAway_Waits("scout");
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "3")]
+        public Task GetScout_IfLessOrEqualThan2secAway_Waits()
+            => GetUnit_IfLessOrEqualThan2secAway_Waits("scout");
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "3")]
+        public Task GetScout_IfLessOrEqualThan2secAway_WaitsUntilArrived()
+            => GetUnit_IfLessOrEqualThan2secAway_WaitsUntilArrived("scout");
     }
 }

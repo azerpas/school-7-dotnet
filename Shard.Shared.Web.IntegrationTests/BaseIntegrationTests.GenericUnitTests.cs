@@ -133,6 +133,90 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.NotNull(planet);
 
             return planet["name"].Value<string>();
+        }
+
+        private async Task<(string, string)> DirectUnitToPlanet(HttpClient client, string unitType)
+        {
+            var userPath = await CreateNewUserPath();
+            var unit = await GetSingleUnitOfType(userPath, unitType);
+            var unitId = unit["id"].Value<string>();
+            var currentSystem = unit["system"].Value<string>();
+            var destinationPlanet = await GetSomePlanetInSystem(currentSystem);
+
+            using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
+            {
+                id = unitId,
+                destinationSystem = currentSystem,
+                destinationPlanet
+            });
+
+            return (userPath, unitId);
+        }
+
+        private async Task<(string, JObject)> SendUnitToPlanet(HttpClient client, string unitType)
+        {
+            var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
+
+            fakeClock.Advance(new TimeSpan(0, 0, 15));
+
+            using var afterMoveResponse = await client.GetAsync($"{userPath}/units/{unitId}");
+            return (userPath, await afterMoveResponse.Content.ReadAsAsync<JObject>());
+        }
+
+        public async Task GetUnit_IfMoreThan2secAway_Waits(string unitType)
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
+
+            fakeClock.Advance(new TimeSpan(0, 0, 13) - TimeSpan.FromTicks(1));
+
+            var requestTask = client.GetAsync($"{userPath}/units/{unitId}");
+            var delayTask = Task.Delay(500);
+            var firstToSucceed = await Task.WhenAny(requestTask, delayTask);
+
+            Assert.Same(requestTask, firstToSucceed);
+
+            using var response = await requestTask;
+            await response.AssertSuccessStatusCode();
+            var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
+            Assert.Null(unitAfterMove["planet"].Value<string>());
+        }
+
+        public async Task GetUnit_IfLessOrEqualThan2secAway_Waits(string unitType)
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
+
+            fakeClock.Advance(new TimeSpan(0, 0, 13));
+
+            var requestTask = client.GetAsync($"{userPath}/units/{unitId}");
+            var delayTask = Task.Delay(500);
+            var firstToSucceed = await Task.WhenAny(requestTask, delayTask);
+
+            Assert.Same(delayTask, firstToSucceed);
+        }
+
+        public async Task GetUnit_IfLessOrEqualThan2secAway_WaitsUntilArrived(string unitType)
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
+
+            fakeClock.Advance(new TimeSpan(0, 0, 13));
+
+            var requestTask = client.GetAsync($"{userPath}/units/{unitId}");
+            await Task.Delay(500);
+
+            fakeClock.Advance(new TimeSpan(0, 0, 2));
+
+            var delayTask = Task.Delay(500);
+            var firstToSucceed = await Task.WhenAny(requestTask, delayTask);
+
+            Assert.Same(requestTask, firstToSucceed);
+
+            using var response = await requestTask;
+            await response.AssertSuccessStatusCode();
+            var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
+            Assert.NotNull(unitAfterMove["planet"].Value<string>());
         }
     }
 }
