@@ -72,13 +72,13 @@ namespace Shard.Shared.Web.IntegrationTests
             {
                 id = unitId,
                 type = unitType,
-                system = destinationSystem
+                destinationSystem
             });
             await response.AssertSuccessStatusCode();
 
             var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(unitId, unitAfterMove["id"].Value<string>());
-            Assert.Equal(destinationSystem, unitAfterMove["system"].Value<string>());
+            Assert.Equal(destinationSystem, unitAfterMove["destinationSystem"].Value<string>());
         }
 
         private async Task<string> GetRandomSystemOtherThan(string systemName)
@@ -108,15 +108,15 @@ namespace Shard.Shared.Web.IntegrationTests
             {
                 id = unitId,
                 type = unitType,
-                system = currentSystem,
-                planet = destinationPlanet
+                destinationSystem = currentSystem,
+                destinationPlanet
             });
             await response.AssertSuccessStatusCode();
 
             var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(unitId, unitAfterMove["id"].Value<string>());
-            Assert.Equal(currentSystem, unitAfterMove["system"].Value<string>());
-            Assert.Equal(destinationPlanet, unitAfterMove["planet"].Value<string>());
+            Assert.Equal(currentSystem, unitAfterMove["destinationSystem"].Value<string>());
+            Assert.Equal(destinationPlanet, unitAfterMove["destinationPlanet"].Value<string>());
         }
 
         private async Task<string> GetSomePlanetInSystem(string systemName)
