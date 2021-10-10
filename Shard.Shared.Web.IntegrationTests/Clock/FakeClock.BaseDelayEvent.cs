@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using Shard.Shared.Web.IntegrationTests.Clock.TaskTracking;
+using System.Threading;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 
 namespace Shard.Shared.Web.IntegrationTests.Clock
 {
@@ -7,19 +9,26 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
     {
         private class BaseDelayEvent
         {
-            private TaskCompletionSource<object> taskCompletionSource;
+            private readonly TaskCompletionSource<object> taskCompletionSource;
+            private readonly AsyncTrackingSyncContext asyncTestSyncContext;
+
             public Task Task => taskCompletionSource.Task;
 
-            public BaseDelayEvent(CancellationToken cancellationToken)
+            public BaseDelayEvent(CancellationToken cancellationToken, AsyncTrackingSyncContext asyncTestSyncContext)
             {
                 taskCompletionSource = new TaskCompletionSource<object>();
                 cancellationToken.Register(
                     () => taskCompletionSource.TrySetCanceled(cancellationToken));
+
+                this.asyncTestSyncContext = asyncTestSyncContext;
             }
 
-            public void Trigger()
+            public async Task TriggerAsync()
             {
                 taskCompletionSource.SetResult(this);
+                // We want to ensure all tasks ready to start 
+                // are triggered before we move on
+                await asyncTestSyncContext.WaitForCompletionAsync();
             }
         }
     }

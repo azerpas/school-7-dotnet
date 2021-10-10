@@ -2,20 +2,30 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Shard.Shared.Core;
+using Shard.Shared.Web.IntegrationTests.Clock.TaskTracking;
+using Xunit.Sdk;
 
 namespace Shard.Shared.Web.IntegrationTests.Clock
 {
     public partial class FakeClock : IClock
     {
+        private AsyncTrackingSyncContext asyncTestSyncContext;
+        
+        public FakeClock()
+        {
+            asyncTestSyncContext = AsyncTrackingSyncContext.Setup();
+        }
+        
         private interface IEvent
         {
             public DateTime TriggerTime { get; }
-            public void Trigger();
+            public Task TriggerAsync();
         }
-
+        
         private readonly ConcurrentDictionary<IEvent, IEvent> events
             = new ConcurrentDictionary<IEvent, IEvent>();
 
@@ -27,26 +37,26 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
 
         public DateTime Now { get; private set; }
 
-        public void SetNow(DateTime now)
+        public async Task SetNow(DateTime now)
         {
-            TriggerEventsUpTo(now);
+            await TriggerEventsUpTo(now);
             Now = now;
         }
 
-        public void Advance(TimeSpan timeSpan)
+        public Task Advance(TimeSpan timeSpan)
             => SetNow(Now + timeSpan);
 
-        private void TriggerEventsUpTo(DateTime now)
+        private async Task TriggerEventsUpTo(DateTime now)
         {
             bool hasAnEventBeenTriggered;
             do
             {
-                hasAnEventBeenTriggered = TryTriggerNextEvent(now);
+                hasAnEventBeenTriggered = await TryTriggerNextEvent(now);
             }
             while (hasAnEventBeenTriggered);
         }
 
-        private bool TryTriggerNextEvent(DateTime now)
+        private async Task<bool> TryTriggerNextEvent(DateTime now)
         {
             var eventToTrigger = FindNextEvent(now);
 
@@ -54,7 +64,7 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
                 return false;
 
             Now = eventToTrigger.TriggerTime;
-            eventToTrigger.Trigger();
+            await eventToTrigger.TriggerAsync();
             return true;
         }
 
@@ -94,13 +104,13 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
             if (delay.TotalMilliseconds < 0)
                 throw new ArgumentOutOfRangeException(nameof(delay), "cannot be negative except -1 ms");
 
-            var delayEvent = new DelayEvent(Now + delay, cancellationToken);
+            var delayEvent = new DelayEvent(Now + delay, cancellationToken, asyncTestSyncContext);
             AddEvent(delayEvent);
             return delayEvent.Task;
         }
         
         private Task InfiniteDelay(CancellationToken cancellationToken)
-            => new BaseDelayEvent(cancellationToken).Task;
+            => new BaseDelayEvent(cancellationToken, asyncTestSyncContext).Task;
 
         public void Sleep(int millisecondsTimeout)
             => Delay(millisecondsTimeout).Wait();

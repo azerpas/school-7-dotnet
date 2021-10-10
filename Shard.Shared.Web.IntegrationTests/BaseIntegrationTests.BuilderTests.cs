@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,7 +79,7 @@ namespace Shard.Shared.Web.IntegrationTests
             });
             await moveResponse.AssertSuccessStatusCode();
 
-            fakeClock.Advance(new TimeSpan(0, 0, 15));
+            await fakeClock.Advance(new TimeSpan(0, 0, 15));
 
             using var scoutingResponse = await client.GetAsync($"{userPath}/units/{unitId}/location");
             await scoutingResponse.AssertSuccessStatusCode();

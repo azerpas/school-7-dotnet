@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using Shard.Shared.Core;
@@ -111,20 +111,20 @@ namespace Shard.Shared.Web.IntegrationTests
             });
             await moveResponse.AssertSuccessStatusCode();
 
-            fakeClock.Advance(new TimeSpan(0, 0, 15));
+            await fakeClock.Advance(new TimeSpan(0, 0, 15));
 
             using var scoutingResponse = await client.GetAsync($"{userPath}/units/{unitId}/location");
             await scoutingResponse.AssertSuccessStatusCode();
 
             var location = await scoutingResponse.Content.ReadAsAsync<JObject>();
             Assert.Equal(currentSystem, location["system"].Value<string>());
-            Assert.Equal(destinationPlanet, location["planet"].Value<string>());
-
+            Assert.Equal(destinationPlanet, location["planet"].Value<string>());
+
             AssertResourcesQuantity(location);
-        }
-
-        private static void AssertResourcesQuantity(JObject data)
-        {
+        }
+
+        private static void AssertResourcesQuantity(JObject data)
+        {
             IDictionary<string, JToken> resources = data["resourcesQuantity"].Value<JObject>();
             Assert.NotNull(resources);
 
@@ -140,7 +140,7 @@ namespace Shard.Shared.Web.IntegrationTests
                     "water",
                     "oxygen",
                 });
-            }
+            }
         }
 
         [Fact]

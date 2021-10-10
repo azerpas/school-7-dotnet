@@ -75,6 +75,12 @@ namespace Shard.Shared.Web.IntegrationTests.Clock
                 Change(period, period);
             }
 
+            public Task TriggerAsync()
+            {
+                Trigger();
+                return Task.CompletedTask;
+            }
+
             public void Dispose()
             {
                 clock.TryRemoveEvent(this);
