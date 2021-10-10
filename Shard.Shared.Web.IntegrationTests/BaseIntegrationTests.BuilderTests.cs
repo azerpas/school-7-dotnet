@@ -12,29 +12,14 @@ namespace Shard.Shared.Web.IntegrationTests
 {
     public partial class BaseIntegrationTests<TEntryPoint, TWebApplicationFactory>
     {
-        private async Task<JObject> GetBuilder(string userPath)
-        {
-            using var client = factory.CreateClient();
-            using var unitsResponse = await client.GetAsync($"{userPath}/units");
-            await unitsResponse.AssertSuccessStatusCode();
-
-            var units = (await unitsResponse.Content.ReadAsAsync<JArray>())
-                .Where(unit => unit["type"].Value<string>() == "builder")
-                .ToArray();
-            Assert.Single(units);
-            return units[0].Value<JObject>();
-        }
+        private Task<JObject> GetBuilder(string userPath)
+            => GetSingleUnitOfType(userPath, "builder");
 
         [Fact]
         [Trait("grading", "true")]
         [Trait("version", "3")]
-        public async Task CreatingUserCreatesBuilder()
-        {
-            var unit = await GetBuilder(await CreateNewUserPath());
-            Assert.NotNull(unit["type"]);
-            Assert.Equal(JTokenType.String, unit["type"].Type);
-            Assert.Equal("builder", unit["type"].Value<string>());
-        }
+        public Task CreatingUserCreatesBuilder()
+            => CreatingUserCreatesOneUnitOfType("builder");
 
         [Fact]
         [Trait("grading", "true")]
@@ -52,85 +37,26 @@ namespace Shard.Shared.Web.IntegrationTests
         [Fact]
         [Trait("grading", "true")]
         [Trait("version", "3")]
-        public async Task GettingBuilderStatusById()
-        {
-            var userPath = await CreateNewUserPath();
-            var unit = await GetBuilder(userPath);
-            var unitId = unit["id"].Value<string>();
-
-            using var client = factory.CreateClient();
-            using var response = await client.GetAsync($"{userPath}/units/{unitId}");
-            await response.AssertSuccessStatusCode();
-
-            var unit2 = await response.Content.ReadAsAsync<JObject>();
-            Assert.Equal(unit.ToString(), unit2.ToString());
-        }
+        public Task GettingBuilderStatusById()
+            => GettingUnitStatusById("builder");
 
         [Fact]
         [Trait("grading", "true")]
         [Trait("version", "3")]
-        public async Task GettingBuilderStatusWithWrongIdReturns404()
-        {
-            var userPath = await CreateNewUserPath();
-            var unit = await GetBuilder(userPath);
-            var unitId = unit["id"].Value<string>();
-
-            using var client = factory.CreateClient();
-            using var response = await client.GetAsync($"{userPath}/units/{unitId}z");
-            await response.AssertStatusEquals(HttpStatusCode.NotFound);
-        }
+        public Task GettingBuilderStatusWithWrongIdReturns404()
+            => GettingUnitStatusWithWrongIdReturns404("builder");
 
         [Fact]
         [Trait("grading", "true")]
         [Trait("version", "3")]
-        public async Task MoveBuilderToOtherSystem()
-        {
-            var userPath = await CreateNewUserPath();
-            var unit = await GetBuilder(userPath);
-            var unitId = unit["id"].Value<string>();
-
-            var currentSystem = unit["system"].Value<string>();
-            var destinationSystem = await GetRandomSystemOtherThan(currentSystem);
-
-            using var client = factory.CreateClient();
-            using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
-            {
-                id = unitId,
-                system = destinationSystem
-            });
-            await response.AssertSuccessStatusCode();
-
-            var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
-            Assert.Equal(unitId, unitAfterMove["id"].Value<string>());
-            Assert.Equal(destinationSystem, unitAfterMove["system"].Value<string>());
-        }
+        public Task MoveBuilderToOtherSystem()
+            => MoveUnitToOtherSystem("builder");
 
         [Fact]
         [Trait("grading", "true")]
         [Trait("version", "3")]
-        public async Task MoveBuilderToPlanet()
-        {
-            var userPath = await CreateNewUserPath();
-            var unit = await GetBuilder(userPath);
-            var unitId = unit["id"].Value<string>();
-
-            var currentSystem = unit["system"].Value<string>();
-            var destinationPlanet = (await GetSomePlanetInSystem(currentSystem));
-
-            using var client = factory.CreateClient();
-            using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
-            {
-                id = unitId,
-                system = currentSystem,
-                planet = destinationPlanet
-            });
-            await response.AssertSuccessStatusCode();
-
-            var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
-            Assert.Equal(unitId, unitAfterMove["id"].Value<string>());
-            Assert.Equal(currentSystem, unitAfterMove["system"].Value<string>());
-            Assert.Equal(destinationPlanet, unitAfterMove["planet"].Value<string>());
-        }
+        public Task MoveBuilderToPlanet()
+            => MoveUnitToPlanet("builder");
 
         [Fact]
         [Trait("grading", "true")]
