@@ -56,6 +56,11 @@ namespace Shard.Uni.Controllers
                 return BadRequest();
             }
 
+            if (!Unit.getAuthorizedTypes().Contains(spaceship.Type))
+            {
+                return BadRequest("Unrecognized type of Unit");
+            }
+
             Unit unt = units.Find(Unit => Unit.Id == unitId);
 
             if (unt == null)

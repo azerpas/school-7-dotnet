@@ -22,7 +22,7 @@ namespace Shard.Uni.Controllers
 
         // GET /Users/{id}
         [HttpGet("{id}")]
-        public ActionResult<User> Get(string id)
+        public ActionResult<UserResourcesDetailDto> Get(string id)
         {
             User user = _userService.Users.Find(User => id == User.Id);
             if (user == null)
@@ -30,24 +30,25 @@ namespace Shard.Uni.Controllers
                 return NotFound();
             }
 
-            return user;
+            return new UserResourcesDetailDto(user);
         }
 
         // PUT /Users/{id}
         [HttpPut("{id}")]
-        public ActionResult<User> Put(string id, User user)
+        public ActionResult<User> Put(string id, CreateUserDto userDto)
         {
-            if (id != user.Id)
+            if (id != userDto.Id)
             {
                 return BadRequest();
             }
             string pattern = @"(([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})|(^[A-Za-z0-9]+$))";
-            if (!Regex.IsMatch(user.Id, pattern, RegexOptions.Multiline))
+            if (!Regex.IsMatch(userDto.Id, pattern, RegexOptions.Multiline))
             {
                 return BadRequest("User Id is incorrect");
             }
 
             User usr = _userService.Users.Find(User => id == User.Id);
+            User user = new User(userDto.Id, userDto.Pseudo);
             if (usr == null) // Adding action
             {
                 // Save User
@@ -62,8 +63,9 @@ namespace Shard.Uni.Controllers
                 Planet planet = system.Planets[index];
 
                 // Add default Unit
-                Unit unit = new Unit("scout", system.Name, planet.Name);
-                _userService.Units.Add(user.Id, new List<Unit> { unit });
+                Unit unitScout = new Unit("scout", system.Name, planet.Name);
+                Unit unitBuilder = new Unit("builder", system.Name, planet.Name);
+                _userService.Units.Add(user.Id, new List<Unit> { unitScout, unitBuilder });
             }
             else // Replacement action
             {

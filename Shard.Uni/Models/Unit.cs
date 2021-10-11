@@ -5,9 +5,9 @@ using System.Text.Json.Serialization;
 
 namespace Shard.Uni.Models
 {
+
     public class Unit
     {
-
         public string Id { get; }
         public string Type { get; set; }
         public string System { get; set; }
@@ -28,6 +28,11 @@ namespace Shard.Uni.Models
             Type = type;
             System = system;
             Planet = planet;
+        }
+
+        public static List<string> getAuthorizedTypes()
+        {
+            return new List<string> { "scount", "builder" };
         }
     }
 
