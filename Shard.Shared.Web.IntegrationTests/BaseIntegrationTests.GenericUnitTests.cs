@@ -156,7 +156,7 @@ namespace Shard.Shared.Web.IntegrationTests
             return (userPath, await afterMoveResponse.Content.ReadAsAsync<JObject>());
         }
 
-        public async Task GetUnit_IfMoreThan2secAway_Waits(string unitType)
+        public async Task GetUnit_IfMoreThan2secAway_DoesNotWait(string unitType)
         {
             using var client = factory.CreateClient();
             var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
