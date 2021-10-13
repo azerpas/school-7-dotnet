@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Shard.Shared.Core;
@@ -18,7 +18,13 @@ namespace Shard.Uni.Models
             Pseudo = pseudo;
             DateOfCreation = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:sssK");
             ResourcesQuantity = new Dictionary<ResourceKind, int> {
-                { ResourceKind.Gold, 2 }
+                { ResourceKind.Gold, 0 },
+                { ResourceKind.Aluminium, 0 },
+                { ResourceKind.Carbon, 20 },
+                { ResourceKind.Iron, 10 },
+                { ResourceKind.Oxygen, 50 },
+                { ResourceKind.Titanium, 0 },
+                { ResourceKind.Water, 50 },
             };
         }
     }
