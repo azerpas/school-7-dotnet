@@ -49,5 +49,10 @@ namespace Shard.Uni.Services
                 )
             ).ToList();
         }
+
+        public List<Planet> GetAllPlanets()
+        {
+            return Systems.Select(System => System.Planets).SelectMany(Planets => Planets).ToList();
+        }
     }
 }
