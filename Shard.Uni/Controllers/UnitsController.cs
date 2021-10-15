@@ -4,6 +4,8 @@ using Shard.Uni.Models;
 using System.Collections.Generic;
 using Shard.Shared.Core;
 using System.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace Shard.Uni.Controllers
 {
@@ -33,7 +35,7 @@ namespace Shard.Uni.Controllers
 
         // GET /Users/{userId}/Units/{unitId}
         [HttpGet("{userId}/Units/{unitId}")]
-        public ActionResult<Unit> Get(string userId, string unitId)
+        public async Task<ActionResult<Unit>> Get(string userId, string unitId)
         {
             List<Unit> units = _userService.Units[userId];
             Unit unit = units.Find(Unit => Unit.Id == unitId);
@@ -43,7 +45,16 @@ namespace Shard.Uni.Controllers
             }
             else
             {
-                return unit;
+                DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
+                if((arrival - DateTime.Now).TotalSeconds > 2)
+                {
+                    return unit;
+                }
+                else
+                {
+                    await _clock.Delay(new TimeSpan(0, 0, 2));
+                    return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                }
             }  
         }
 
