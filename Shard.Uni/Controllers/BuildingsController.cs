@@ -29,10 +29,22 @@ namespace Shard.Uni.Controllers
                 return NotFound("User not found");
             }
 
-            Unit unit = _userService.Units[user.Id].Find(Unit => Unit.Id == createBuilding.BuilderId && Unit.Type == "builder");
+            if(createBuilding.BuilderId == null)
+            {
+                return BadRequest("Please input a builder id");
+            }
+
+            // Test BuildingWithIncorrectBuildingTypeSends400
+            if (!Building.getBuildingTypes().Contains(createBuilding.Type))
+            {
+                return BadRequest("Wrong Building Type");
+            }
+
+            Unit unit = _userService.Units[user.Id].Find(Unit => Unit.Id == createBuilding.BuilderId);
 
             if (unit == null)
             {
+                // FIXME: test BuildingWithIncorrectBuilderIdSend400 says we need to return 400?
                 return NotFound("Unit not found");
             }
 

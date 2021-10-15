@@ -14,11 +14,13 @@ namespace Shard.Uni.Controllers
 
         private UserService _userService;
         private readonly SectorService _sectorService;
+        private IClock _clock;
 
-        public UnitsController(UserService userService, SectorService sectorService)
+        public UnitsController(UserService userService, SectorService sectorService, IClock clock)
         {
             _userService = userService;
             _sectorService = sectorService;
+            _clock = clock;
         }
 
         // GET /Users/{userId}/Units
@@ -93,7 +95,7 @@ namespace Shard.Uni.Controllers
                 _userService.Units[userId].Add(spaceship);
                 
                 bool sameSystem = spaceship.DestinationSystem == spaceship.System;
-                spaceship.moveTo(system: destinationSystem.Name, planet: destinationPlanet.Name);
+                spaceship.MoveTo(system: destinationSystem.Name, planet: destinationPlanet.Name, _clock);
             }
             return spaceship;
         }

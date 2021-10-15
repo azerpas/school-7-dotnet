@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace Shard.Uni.Models
 {
     public class Building
@@ -15,6 +17,8 @@ namespace Shard.Uni.Models
             System = system;
             Planet = planet;
         }
+
+        public static List<string> getBuildingTypes() => new List<string> { "mine" };
     }
 
     public class CreateBuilding
