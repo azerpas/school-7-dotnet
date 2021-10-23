@@ -15,7 +15,7 @@ namespace Shard.Uni.Models
         public string Id { get; }
         public string Type { get; set; }
         public string System { get; set; }
-        public string Planet { get; set; } // FIXME: nullable
+        public string? Planet { get; set; }
         public string DestinationPlanet { get; set; }
         public string DestinationSystem { get; set; }
         public string EstimatedTimeOfArrival { get; set; }
