@@ -45,16 +45,20 @@ namespace Shard.Uni.Controllers
             }
             else
             {
-                DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
-                if((arrival - DateTime.Now).TotalSeconds > 2)
+                if (unit.EstimatedTimeOfArrival != null)
                 {
-                    return unit;
+                    DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
+                    if ((arrival - DateTime.Now).TotalSeconds > 2)
+                    {
+                        return unit;
+                    }
+                    else
+                    {
+                        await _clock.Delay(new TimeSpan(0, 0, 2));
+                        return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                    }
                 }
-                else
-                {
-                    await _clock.Delay(new TimeSpan(0, 0, 2));
-                    return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
-                }
+                else return unit;
             }  
         }
 
@@ -88,10 +92,12 @@ namespace Shard.Uni.Controllers
                 return NotFound("Destination Planet not found");
             }
 
+            /*
             if (destinationPlanetIsInDestinationSystem == false)
             {
                 return BadRequest("Destination planet is not in destination system");
             }
+            */
 
             Unit unt = units.Find(Unit => Unit.Id == unitId);
 
