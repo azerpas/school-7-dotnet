@@ -4,6 +4,8 @@ using Shard.Uni.Models;
 using System.Collections.Generic;
 using Shard.Shared.Core;
 using System.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace Shard.Uni.Controllers
 {
@@ -14,11 +16,13 @@ namespace Shard.Uni.Controllers
 
         private UserService _userService;
         private readonly SectorService _sectorService;
+        private IClock _clock;
 
-        public UnitsController(UserService userService, SectorService sectorService)
+        public UnitsController(UserService userService, SectorService sectorService, IClock clock)
         {
             _userService = userService;
             _sectorService = sectorService;
+            _clock = clock;
         }
 
         // GET /Users/{userId}/Units
@@ -31,7 +35,7 @@ namespace Shard.Uni.Controllers
 
         // GET /Users/{userId}/Units/{unitId}
         [HttpGet("{userId}/Units/{unitId}")]
-        public ActionResult<Unit> Get(string userId, string unitId)
+        public async Task<ActionResult<Unit>> Get(string userId, string unitId)
         {
             List<Unit> units = _userService.Units[userId];
             Unit unit = units.Find(Unit => Unit.Id == unitId);
@@ -41,7 +45,25 @@ namespace Shard.Uni.Controllers
             }
             else
             {
-                return unit;
+                if (unit.EstimatedTimeOfArrival != null)
+                {
+                    DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
+                    if (
+                        (arrival - DateTime.Now).TotalSeconds > 2 ||
+                        DateTime.Now > arrival ||
+                        (unit.Planet == unit.DestinationPlanet && unit.System == unit.DestinationSystem)
+                    )
+                    {
+                        return unit;
+                    }
+                    else
+                    {
+                        int delay = (arrival - DateTime.Now).Milliseconds;
+                        await _clock.Delay(delay);
+                        return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                    }
+                }
+                else return unit;
             }  
         }
 
@@ -56,6 +78,32 @@ namespace Shard.Uni.Controllers
                 return BadRequest();
             }
 
+            if (!Unit.getAuthorizedTypes().Contains(spaceship.Type))
+            {
+                return BadRequest("Unrecognized type of Unit");
+            }
+
+            StarSystem destinationSystem = _sectorService.Systems.Find(StarSystem => StarSystem.Name == spaceship.DestinationSystem);
+            Planet destinationPlanet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == spaceship.DestinationPlanet);
+            // bool destinationPlanetIsInDestinationSystem = destinationSystem.Planets.Exists(Planet => Planet.Name == destinationPlanet.Name);
+
+            if (destinationSystem == null)
+            {
+                return NotFound("Destination System not found");
+            }
+            /*
+            if (destinationPlanet == null)
+            {
+                return NotFound("Destination Planet not found");
+            }
+
+            
+            if (destinationPlanetIsInDestinationSystem == false)
+            {
+                return BadRequest("Destination planet is not in destination system");
+            }
+            */
+
             Unit unt = units.Find(Unit => Unit.Id == unitId);
 
             if (unt == null)
@@ -67,6 +115,9 @@ namespace Shard.Uni.Controllers
                 Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
                 _userService.Units[userId].Remove(oldUnit);
                 _userService.Units[userId].Add(spaceship);
+                
+                bool sameSystem = spaceship.DestinationSystem == spaceship.System;
+                spaceship.MoveTo(system: destinationSystem.Name, planet: destinationPlanet?.Name, _clock);
             }
             return spaceship;
         }
@@ -89,6 +140,10 @@ namespace Shard.Uni.Controllers
                 // Setting the Key to lower because of the test verification :
                 // https://gitlab.com/efrei-p2023/efrei-p2023-csharp/-/blob/v2/Shard.Shared.Web.IntegrationTests/BaseIntegrationTests.ScoutTests.cs#L225-235
                 UnitLocationDetailDto unitLocation = new UnitLocationDetailDto(unit.System, planet);
+                if(unit.Type == "builder")
+                {
+                    unitLocation.resourcesQuantity = null;
+                }
                 return unitLocation;
             }
         }

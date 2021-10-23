@@ -94,14 +94,45 @@ namespace Shard.Shared.Web.IntegrationTests
             using var getUserResponse = await client.GetAsync("users/47");
             await getUserResponse.AssertSuccessStatusCode();
 
-            var units = await getUserResponse.Content.ReadAsAsync<JObject>();
-            Assert.NotNull(units["id"]);
-            Assert.Equal(JTokenType.String, units["id"].Type);
-            Assert.Equal("47", units["id"].Value<string>());
+            var user = await getUserResponse.Content.ReadAsAsync<JObject>();
+            Assert.NotNull(user["id"]);
+            Assert.Equal(JTokenType.String, user["id"].Type);
+            Assert.Equal("47", user["id"].Value<string>());
 
-            Assert.NotNull(units["pseudo"]);
-            Assert.Equal(JTokenType.String, units["pseudo"].Type);
-            Assert.Equal("johny", units["pseudo"].Value<string>());
+            Assert.NotNull(user["pseudo"]);
+            Assert.Equal(JTokenType.String, user["pseudo"].Type);
+            Assert.Equal("johny", user["pseudo"].Value<string>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "3")]
+        public async Task CanFetchResourcesFromNewlyCreatedUser()
+        {
+            using var client = factory.CreateClient();
+            using var getUserResponse = await client.GetAsync(await CreateNewUserPath());
+
+            var user = await getUserResponse.Content.ReadAsAsync<JObject>();
+            AssertResourcesQuantity(user);
+        }
+
+        [Theory]
+        [InlineData("aluminium", 0)]
+        [InlineData("carbon", 20)]
+        [InlineData("gold", 0)]
+        [InlineData("iron", 10)]
+        [InlineData("oxygen", 50)]
+        [InlineData("titanium", 0)]
+        [InlineData("water", 50)]
+        [Trait("grading", "true")]
+        [Trait("version", "3")]
+        public async Task GivesBasicResourcesToNewUser(string resourceName, int resourceQuantity)
+        {
+            using var client = factory.CreateClient();
+            using var getUserResponse = await client.GetAsync(await CreateNewUserPath());
+
+            var user = await getUserResponse.Content.ReadAsAsync<JObject>();
+            Assert.Equal(resourceQuantity, user["resourcesQuantity"][resourceName].Value<int>());
         }
     }
 }
