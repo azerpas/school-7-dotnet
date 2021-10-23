@@ -63,9 +63,10 @@ namespace Shard.Uni.Controllers
                 Planet planet = system.Planets[index];
 
                 // Add default Unit
-                Unit unitScout = new Unit("scout", system.Name, planet.Name);
-                Unit unitBuilder = new Unit("builder", system.Name, planet.Name);
+                Unit unitScout = new Unit("scout", system.Name, null);
+                Unit unitBuilder = new Unit("builder", system.Name, null);
                 _userService.Units.Add(user.Id, new List<Unit> { unitScout, unitBuilder });
+                _userService.Buildings.Add(user.Id, new List<Building> { });
             }
             else // Replacement action
             {

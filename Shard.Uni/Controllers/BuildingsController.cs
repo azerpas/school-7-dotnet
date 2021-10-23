@@ -48,6 +48,12 @@ namespace Shard.Uni.Controllers
                 return NotFound("Unit not found");
             }
 
+            // Test BuildingWithUnitNotOverPlanetSends404
+            if (unit.Planet == null)
+            {
+                return BadRequest("Unit is not over a planet");
+            }
+
             Building building = new Building(createBuilding.Id, "mine", unit.System, unit.Planet);
             _userService.Buildings[user.Id].Add(building);
 

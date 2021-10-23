@@ -20,7 +20,7 @@ namespace Shard.Uni.Models
         public string DestinationSystem { get; set; }
         public string EstimatedTimeOfArrival { get; set; }
 
-        public Unit(string type, string system, string planet)
+        public Unit(string type, string system, string? planet)
         {
             Id = Guid.NewGuid().ToString();
             Type = type;
@@ -31,7 +31,7 @@ namespace Shard.Uni.Models
         }
 
         [JsonConstructorAttribute]
-        public Unit(string id, string type, string system, string planet)
+        public Unit(string id, string type, string system, string? planet)
         {
             Id = id;
             Type = type;
@@ -75,14 +75,14 @@ namespace Shard.Uni.Models
     public class UnitLocationDetailDto
     {
         public string System { get; set; }
-        public string Planet { get; set; }
+        public string? Planet { get; set; }
         public Dictionary<string, int> resourcesQuantity { get; set; }
 
-        public UnitLocationDetailDto(string system, Planet planet)
+        public UnitLocationDetailDto(string system, Planet? planet)
         {
             System = system;
-            Planet = planet.Name;
-            resourcesQuantity = planet.ResourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
+            Planet = planet?.Name;
+            resourcesQuantity = planet?.ResourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
         }
     }
 }

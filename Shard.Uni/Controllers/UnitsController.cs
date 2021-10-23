@@ -48,13 +48,18 @@ namespace Shard.Uni.Controllers
                 if (unit.EstimatedTimeOfArrival != null)
                 {
                     DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
-                    if ((arrival - DateTime.Now).TotalSeconds > 2)
+                    if (
+                        (arrival - DateTime.Now).TotalSeconds > 2 ||
+                        DateTime.Now > arrival ||
+                        (unit.Planet == unit.DestinationPlanet && unit.System == unit.DestinationSystem)
+                    )
                     {
                         return unit;
                     }
                     else
                     {
-                        await _clock.Delay(new TimeSpan(0, 0, 2));
+                        int delay = (arrival - DateTime.Now).Milliseconds;
+                        await _clock.Delay(delay);
                         return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
                     }
                 }
