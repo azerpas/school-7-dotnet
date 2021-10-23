@@ -45,7 +45,7 @@ namespace Shard.Uni.Models
         }
 
 #nullable enable
-        public void MoveTo(string system, string planet, IClock clock)
+        public void MoveTo(string system, string? planet, IClock clock)
         {
             DateTime now = DateTime.Now;
             int timeToMove = TimeToLeavePlanet + TimeToEnterPlanet;

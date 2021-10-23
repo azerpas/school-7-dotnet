@@ -85,19 +85,19 @@ namespace Shard.Uni.Controllers
 
             StarSystem destinationSystem = _sectorService.Systems.Find(StarSystem => StarSystem.Name == spaceship.DestinationSystem);
             Planet destinationPlanet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == spaceship.DestinationPlanet);
-            bool destinationPlanetIsInDestinationSystem = destinationSystem.Planets.Exists(Planet => Planet.Name == destinationPlanet.Name);
+            // bool destinationPlanetIsInDestinationSystem = destinationSystem.Planets.Exists(Planet => Planet.Name == destinationPlanet.Name);
 
             if (destinationSystem == null)
             {
                 return NotFound("Destination System not found");
             }
-
+            /*
             if (destinationPlanet == null)
             {
                 return NotFound("Destination Planet not found");
             }
 
-            /*
+            
             if (destinationPlanetIsInDestinationSystem == false)
             {
                 return BadRequest("Destination planet is not in destination system");
@@ -117,7 +117,7 @@ namespace Shard.Uni.Controllers
                 _userService.Units[userId].Add(spaceship);
                 
                 bool sameSystem = spaceship.DestinationSystem == spaceship.System;
-                spaceship.MoveTo(system: destinationSystem.Name, planet: destinationPlanet.Name, _clock);
+                spaceship.MoveTo(system: destinationSystem.Name, planet: destinationPlanet?.Name, _clock);
             }
             return spaceship;
         }
