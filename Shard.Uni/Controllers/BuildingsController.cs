@@ -45,7 +45,8 @@ namespace Shard.Uni.Controllers
             if (unit == null)
             {
                 // FIXME: test BuildingWithIncorrectBuilderIdSend400 says we need to return 400?
-                return NotFound("Unit not found");
+                // Should be 404
+                return BadRequest("Unit not found");
             }
 
             // Test BuildingWithUnitNotOverPlanetSends404

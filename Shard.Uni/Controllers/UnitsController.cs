@@ -140,6 +140,10 @@ namespace Shard.Uni.Controllers
                 // Setting the Key to lower because of the test verification :
                 // https://gitlab.com/efrei-p2023/efrei-p2023-csharp/-/blob/v2/Shard.Shared.Web.IntegrationTests/BaseIntegrationTests.ScoutTests.cs#L225-235
                 UnitLocationDetailDto unitLocation = new UnitLocationDetailDto(unit.System, planet);
+                if(unit.Type == "builder")
+                {
+                    unitLocation.resourcesQuantity = null;
+                }
                 return unitLocation;
             }
         }

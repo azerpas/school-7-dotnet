@@ -76,13 +76,13 @@ namespace Shard.Uni.Models
     {
         public string System { get; set; }
         public string? Planet { get; set; }
-        public Dictionary<string, int> resourcesQuantity { get; set; }
+        public Dictionary<string, int>? resourcesQuantity { get; set; }
 
         public UnitLocationDetailDto(string system, Planet? planet)
         {
             System = system;
             Planet = planet?.Name;
-            resourcesQuantity = planet?.ResourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
+            resourcesQuantity = planet != null ? planet.ResourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value) : null;
         }
     }
 }
