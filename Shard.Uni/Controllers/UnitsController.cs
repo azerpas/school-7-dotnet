@@ -48,12 +48,15 @@ namespace Shard.Uni.Controllers
                 if (unit.EstimatedTimeOfArrival != null)
                 {
                     DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
+                    DateTime now = DateTime.Now;
+                    double timeBeforeArrival = (arrival - now).TotalSeconds;
                     if (
-                        (arrival - DateTime.Now).TotalSeconds > 2 ||
-                        DateTime.Now > arrival ||
+                        timeBeforeArrival > 2 ||
+                        now > arrival ||
                         (unit.Planet == unit.DestinationPlanet && unit.System == unit.DestinationSystem)
                     )
                     {
+                        unit.Planet = null;
                         return unit;
                     }
                     else
