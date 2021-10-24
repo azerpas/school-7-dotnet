@@ -17,7 +17,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task CanReadSystems()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -30,7 +30,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task SystemsHaveNames()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -45,7 +45,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task SystemsHavePlanets()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -61,7 +61,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task PlanetsHaveNames()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -78,7 +78,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task PlanetsHaveSizes()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -94,7 +94,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task PlanetsDoNotHaveResources()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -106,7 +106,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         public async Task<JToken> GetFirstSystem()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var systemsResponse = await client.GetAsync("systems");
             await systemsResponse.AssertSuccessStatusCode();
 
@@ -124,7 +124,7 @@ namespace Shard.Shared.Web.IntegrationTests
         {
             var system = await GetFirstSystem();
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems/" + system["name"].Value<string>());
             await response.AssertSuccessStatusCode();
 
@@ -138,7 +138,7 @@ namespace Shard.Shared.Web.IntegrationTests
         {
             var system = await GetFirstSystem();
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems/" + system["name"].Value<string>() + "/planets");
             await response.AssertSuccessStatusCode();
 
@@ -153,7 +153,7 @@ namespace Shard.Shared.Web.IntegrationTests
             var system = await GetFirstSystem();
             var planet = system["planets"][0];
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync(
                 "systems/" + system["name"].Value<string>() + "/planets/" + planet["name"].Value<string>());
             await response.AssertSuccessStatusCode();
@@ -165,7 +165,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("grading", "true")]
         public async Task NonExistingSystemReturns404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 

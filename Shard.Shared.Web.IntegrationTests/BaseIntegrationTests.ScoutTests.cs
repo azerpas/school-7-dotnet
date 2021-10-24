@@ -18,7 +18,7 @@ namespace Shard.Shared.Web.IntegrationTests
         private async Task<string> CreateNewUserPath()
         {
             var userId = Guid.NewGuid().ToString();
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var userCreationResponse = await client.PutAsJsonAsync("users/" + userId, new
             {
                 id = userId,
@@ -28,6 +28,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
             return "users/" + userId;
         }
+
         private Task<JObject> GetScout(string userPath)
             => GetSingleUnitOfType(userPath, "scout");
 
@@ -55,7 +56,7 @@ namespace Shard.Shared.Web.IntegrationTests
             var unit = await GetScout(await CreateNewUserPath());
             var systemName = unit["system"].Value<string>();
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -103,7 +104,7 @@ namespace Shard.Shared.Web.IntegrationTests
             unit["destinationSystem"] = currentSystem;
             unit["destinationPlanet"] = destinationPlanet;
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
             await moveResponse.AssertSuccessStatusCode();
 

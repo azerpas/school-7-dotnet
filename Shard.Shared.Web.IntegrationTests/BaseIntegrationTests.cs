@@ -11,6 +11,9 @@ using Xunit.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using System.Linq; 
 using System.Threading;
+using System.Net.Http;
+using Microsoft.AspNetCore.Mvc.Testing.Handlers;
+using System;
  
 namespace Shard.Shared.Web.IntegrationTests 
 { 
@@ -43,6 +46,19 @@ namespace Shard.Shared.Web.IntegrationTests
         { 
             foreach (var source in configuration.Sources.OfType<FileConfigurationSource>()) 
                 source.ReloadOnChange = false; 
+        }
+
+        private HttpClient CreateClient()
+        {
+            var client = factory.CreateDefaultClient(
+                factory.ClientOptions.BaseAddress,
+                new RedirectHandler(),
+                new CookieContainerHandler(),
+                new TimeoutHandler());
+
+            client.Timeout = TimeSpan.FromSeconds(3);
+
+            return client;
         }
     } 
 } 

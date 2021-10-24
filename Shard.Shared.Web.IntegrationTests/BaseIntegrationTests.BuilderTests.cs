@@ -73,7 +73,7 @@ namespace Shard.Shared.Web.IntegrationTests
             unit["destinationSystem"] = currentSystem;
             unit["destinationPlanet"] = destinationPlanet;
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var moveResponse = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
             await moveResponse.AssertSuccessStatusCode();
 
@@ -95,7 +95,8 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task CanBuildMineOnPlanet()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(1);
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
@@ -115,7 +116,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task BuildingMineReturnsMineWithLocation()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
@@ -135,7 +136,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task BuildingWithNoBodySends400()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync<object>($"{userPath}/buildings", null);
@@ -147,7 +148,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task BuildingWithIncorrectUserIdSends404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}x/buildings", new
@@ -163,7 +164,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task BuildingWithNoBuilderIdSends400()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
@@ -178,7 +179,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task BuildingWithIncorrectBuilderIdSends400()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
@@ -194,7 +195,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task BuildingWithIncorrectBuildingTypeSends400()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
@@ -210,7 +211,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task BuildingWithUnitNotOverPlanetSends404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
 
             var userPath = await CreateNewUserPath();
             var builder = await GetBuilder(userPath);

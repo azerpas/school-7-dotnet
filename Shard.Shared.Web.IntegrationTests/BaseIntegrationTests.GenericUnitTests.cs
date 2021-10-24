@@ -14,7 +14,7 @@ namespace Shard.Shared.Web.IntegrationTests
     {
         private async Task<JObject> GetSingleUnitOfType(string userPath, string unitType)
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var unitsResponse = await client.GetAsync($"{userPath}/units");
             await unitsResponse.AssertSuccessStatusCode();
 
@@ -39,7 +39,7 @@ namespace Shard.Shared.Web.IntegrationTests
             var unit = await GetSingleUnitOfType(userPath, unitType);
             var unitId = unit["id"].Value<string>();
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync($"{userPath}/units/{unitId}");
             await response.AssertSuccessStatusCode();
 
@@ -53,7 +53,7 @@ namespace Shard.Shared.Web.IntegrationTests
             var unit = await GetSingleUnitOfType(userPath, unitType);
             var unitId = unit["id"].Value<string>();
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync($"{userPath}/units/{unitId}z");
             await response.AssertStatusEquals(HttpStatusCode.NotFound);
         }
@@ -69,7 +69,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
             unit["destinationSystem"] = destinationSystem;
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
             await response.AssertSuccessStatusCode();
 
@@ -80,7 +80,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         private async Task<string> GetRandomSystemOtherThan(string systemName)
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -103,7 +103,7 @@ namespace Shard.Shared.Web.IntegrationTests
             unit["destinationSystem"] = currentSystem;
             unit["destinationPlanet"] = destinationPlanet;
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", unit);
             await response.AssertSuccessStatusCode();
 
@@ -115,7 +115,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         private async Task<string> GetSomePlanetInSystem(string systemName)
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -158,7 +158,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         public async Task GetUnit_IfMoreThan2secAway_DoesNotWait(string unitType)
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
 
             await fakeClock.Advance(new TimeSpan(0, 0, 13) - TimeSpan.FromTicks(1));
@@ -177,7 +177,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         public async Task GetUnit_IfLessOrEqualThan2secAway_Waits(string unitType)
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
 
             await fakeClock.Advance(new TimeSpan(0, 0, 13));
@@ -191,7 +191,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         public async Task GetUnit_IfLessOrEqualThan2secAway_WaitsUntilArrived(string unitType)
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, unitId) = await DirectUnitToPlanet(client, unitType);
 
             await fakeClock.Advance(new TimeSpan(0, 0, 13));
