@@ -51,19 +51,28 @@ namespace Shard.Uni.Controllers
                     DateTime now = DateTime.Now;
                     double timeBeforeArrival = (arrival - now).TotalSeconds;
                     if (
-                        timeBeforeArrival > 2 ||
-                        now > arrival ||
-                        (unit.Planet == unit.DestinationPlanet && unit.System == unit.DestinationSystem)
+                        timeBeforeArrival > 2.0
                     )
-                    {
+                    {   // Contient la destination
+                        //bool a = timeBeforeArrival > 2;
+                        //bool b = now > arrival;
+                        //bool c = (unit.Planet == unit.DestinationPlanet && unit.System == unit.DestinationSystem);
                         unit.Planet = null;
                         return unit;
                     }
                     else
-                    {
-                        int delay = (arrival - DateTime.Now).Milliseconds;
-                        await _clock.Delay(delay);
-                        return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                    {   // Contient l’arrivée au lieu
+                        if(timeBeforeArrival > 0 && timeBeforeArrival <= 2)
+                        {
+                            int delay = (arrival - DateTime.Now).Milliseconds;
+                            await _clock.Delay(delay);
+                            return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                        }
+                        else
+                        {   // 0 secondes: 200 OK
+                            return unit;
+                        }
+                        
                     }
                 }
                 else return unit;
