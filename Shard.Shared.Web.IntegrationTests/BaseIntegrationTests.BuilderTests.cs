@@ -141,7 +141,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [InlineData("gaseous")]
         public async Task BuildingMineOfGivenResourceKindReturnsMineWithGivenResourceKind(string resourceCategory)
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder) = await SendUnitToPlanet(client, "builder");
 
             var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
@@ -161,7 +161,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task BuildingMineReturnsUnbuiltMineWithExpectedBuildTime()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (_, _, building) = await BuildMine(client);
             Assert.False(building["isBuilt"].Value<bool>());
             Assert.Equal(fakeClock.Now.AddMinutes(5), building["estimatedBuildTime"].Value<DateTime>());

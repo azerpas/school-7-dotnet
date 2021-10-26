@@ -17,7 +17,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task BuildingMineThenFetchingAllBuildingsIncludesMine()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             var response = await client.GetAsync($"{userPath}/buildings");
@@ -35,7 +35,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task FetchingBuildingsOfWrongUserReturns404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             var response = await client.GetAsync($"{userPath}z/buildings");
@@ -56,7 +56,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task FetchingOneBuildingOfWrongUserReturns404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             var response = await client.GetAsync($"{userPath}z/buildings/{originalBuilding["id"].Value<string>()}");
@@ -68,7 +68,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task FetchingOneBuildingWithWrongIdReturns404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             var response = await client.GetAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}z");
@@ -81,7 +81,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task BuildingMineThenWaiting4MinReturnsUnbuiltMine()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(4));
@@ -96,7 +96,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task BuildingMineThenWaiting5MinReturnsBuiltMine()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(5));
@@ -112,7 +112,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task BuildingMineThenMoveBuilderCancelBuilding()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(2));
@@ -132,7 +132,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task BuildingMineThenFakeMoveBuilderDoesNotCancelBuilding()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(2));
@@ -151,7 +151,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("grading", "true")]
         public async Task GetMine_IfMoreThan2secBeforeBuilt_DoesNotWait()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(5) - TimeSpan.FromSeconds(2) - TimeSpan.FromTicks(1));
@@ -168,7 +168,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("grading", "true")]
         public async Task GetMine_IfLessOrEqualThan2secBeforeBuilt_Waits()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(5) - TimeSpan.FromSeconds(2));
@@ -184,7 +184,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("grading", "true")]
         public async Task GetMine_IfLessOrEqualThan2secBeforeBuilt_WaitsUntilCompleted()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(5) - TimeSpan.FromSeconds(2));
@@ -205,7 +205,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("grading", "true")]
         public async Task GetMine_IfLessOrEqualThan2secBeforeBuilt_WaitsUntilUnitMoves_AndReturns404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, builder, originalBuilding) = await BuildMine(client);
 
             await fakeClock.Advance(TimeSpan.FromMinutes(5) - TimeSpan.FromSeconds(2));
@@ -231,7 +231,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Fact]
         public async Task BuildingMineThenWaiting6MinIncreaseResource()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "9e466528-42f7-2279-32cd-f5f595113d17");
 
             await AssertResourceQuantity(client, userPath, "carbon", 20);
@@ -246,7 +246,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task BuildingMineThenWaitingLotsOfTimeIncreaseResourceByUpToThePlanetResources()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "9e466528-42f7-2279-32cd-f5f595113d17");
 
             await AssertResourceQuantity(client, userPath, "carbon", 20);
@@ -262,7 +262,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task MineExtractFirstMostPresentResource()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "5915a33d-8c25-105b-56d4-10de1a2ab3fe");
             await fakeClock.Advance(TimeSpan.FromMinutes(5));
 
@@ -281,7 +281,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task MineExtractThenMostRareResourceAlternating()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "5915a33d-8c25-105b-56d4-10de1a2ab3fe");
             await fakeClock.Advance(TimeSpan.FromMinutes(5));
 
@@ -310,7 +310,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task MineCanExhaustPlanet()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "5915a33d-8c25-105b-56d4-10de1a2ab3fe");
             await fakeClock.Advance(TimeSpan.FromMinutes(5));
 
@@ -329,7 +329,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task SolidMineExtractOnlySolids()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "3697bdfb-adaf-a820-018b-854cd49ff686",
                 "solid");
             await fakeClock.Advance(TimeSpan.FromMinutes(5));
@@ -351,7 +351,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task LiquidMineExtractOnlyWater()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "3697bdfb-adaf-a820-018b-854cd49ff686",
                 "liquid");
             await fakeClock.Advance(TimeSpan.FromMinutes(5));
@@ -373,7 +373,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "4")]
         public async Task GasMineExtractOnlyOxygen()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             var (userPath, _, originalBuilding) = await BuildMineOn(client, "13ed60e3-1692-56cd-ae38-b7c02013ce9e", "3697bdfb-adaf-a820-018b-854cd49ff686", 
                 "gaseous");
             await fakeClock.Advance(TimeSpan.FromMinutes(5));

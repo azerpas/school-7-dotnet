@@ -185,7 +185,7 @@ namespace Shard.Shared.Web.IntegrationTests
         {
             var expectedJson = GetExpectedJson("expectedTestSector.json")?.Replace("\r", string.Empty);
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
