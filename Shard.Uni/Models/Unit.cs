@@ -69,6 +69,7 @@ namespace Shard.Uni.Models
             Unit unit = (Unit)state;
             System = unit.DestinationSystem;
             Planet = unit.DestinationPlanet;
+            EstimatedTimeOfArrival = null;
         }
     }
 
