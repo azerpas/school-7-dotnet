@@ -59,7 +59,7 @@ namespace Shard.Uni.Controllers
                     {   // Contient l’arrivée au lieu
                         if(timeBeforeArrival > 0 && timeBeforeArrival <= 2)
                         {
-                            int delay = (arrival - DateTime.Now).Milliseconds;
+                            int delay = (arrival - _clock.Now).Milliseconds;
                             await _clock.Delay(delay);
                             return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
                         }
