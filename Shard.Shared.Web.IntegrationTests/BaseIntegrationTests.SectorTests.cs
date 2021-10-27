@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -17,7 +19,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task CanReadSystems()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -30,7 +32,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task SystemsHaveNames()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -45,7 +47,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task SystemsHavePlanets()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -61,7 +63,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task PlanetsHaveNames()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -78,7 +80,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "1")]
         public async Task PlanetsHaveSizes()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -94,7 +96,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task PlanetsDoNotHaveResources()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -106,7 +108,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         public async Task<JToken> GetFirstSystem()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var systemsResponse = await client.GetAsync("systems");
             await systemsResponse.AssertSuccessStatusCode();
 
@@ -124,7 +126,7 @@ namespace Shard.Shared.Web.IntegrationTests
         {
             var system = await GetFirstSystem();
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems/" + system["name"].Value<string>());
             await response.AssertSuccessStatusCode();
 
@@ -138,7 +140,7 @@ namespace Shard.Shared.Web.IntegrationTests
         {
             var system = await GetFirstSystem();
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems/" + system["name"].Value<string>() + "/planets");
             await response.AssertSuccessStatusCode();
 
@@ -153,7 +155,7 @@ namespace Shard.Shared.Web.IntegrationTests
             var system = await GetFirstSystem();
             var planet = system["planets"][0];
 
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync(
                 "systems/" + system["name"].Value<string>() + "/planets/" + planet["name"].Value<string>());
             await response.AssertSuccessStatusCode();
@@ -165,7 +167,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("grading", "true")]
         public async Task NonExistingSystemReturns404()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("systems");
             await response.AssertSuccessStatusCode();
 
@@ -174,6 +176,34 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.NotNull(array.SelectToken("[0].planets[0].size"));
             Assert.Equal(JTokenType.Integer, array.SelectToken("[0].planets[0].size").Type);
             Assert.Equal(JTokenType.Integer, array.SelectToken("[0].planets[0].size").Type);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "4")]
+        public async Task SystemIsFollowingTestSpecifications()
+        {
+            var expectedJson = GetExpectedJson("expectedTestSector.json")?.Replace("\r", string.Empty);
+
+            using var client = CreateClient();
+            using var response = await client.GetAsync("systems");
+            await response.AssertSuccessStatusCode();
+
+            var array = await response.Content.ReadAsAsync<JArray>();
+            Assert.Equal(expectedJson, array.ToString(Formatting.Indented)?.Replace("\r", string.Empty));
+        } 
+ 
+        private static string GetExpectedJson(string fileName)
+        {
+            // We assume test files are under the current assembly 
+            // AND the same namespace (or a child one)
+            var sibblingType = typeof(BaseIntegrationTests<TEntryPoint, TWebApplicationFactory>);
+            var owningAssembly = sibblingType.Assembly;
+            var baseNameSpace = sibblingType.Namespace;
+
+            using var stream = owningAssembly.GetManifestResourceStream(baseNameSpace + "." + fileName);
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

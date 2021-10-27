@@ -17,7 +17,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task CanGet404WhenQueryingUser()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.GetAsync("users/42");
             await response.AssertStatusEquals(HttpStatusCode.NotFound);
         }
@@ -27,7 +27,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task CanCreateUser()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.PutAsJsonAsync("users/43", new
             {
                 id = "43",
@@ -45,7 +45,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task CreatingUserWithInconsistentIdFails()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.PutAsJsonAsync("users/44", new
             {
                 id = "45",
@@ -59,7 +59,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task CreatingUserWithLackOfBodyFails()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.PutAsJsonAsync<object>("users/46", null);
             await response.AssertStatusEquals(HttpStatusCode.BadRequest);
         }
@@ -69,7 +69,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task CreatingUserWithInvalidIdFails()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var response = await client.PutAsJsonAsync("users/'", new
             {
                 id = "'",
@@ -83,7 +83,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public async Task CanFetchCreatedUser()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var userCreationResponse = await client.PutAsJsonAsync("users/47", new
             {
                 id = "47",
@@ -109,7 +109,7 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task CanFetchResourcesFromNewlyCreatedUser()
         {
-            using var client = factory.CreateClient();
+            using var client = CreateClient();
             using var getUserResponse = await client.GetAsync(await CreateNewUserPath());
 
             var user = await getUserResponse.Content.ReadAsAsync<JObject>();
@@ -128,8 +128,14 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public async Task GivesBasicResourcesToNewUser(string resourceName, int resourceQuantity)
         {
-            using var client = factory.CreateClient();
-            using var getUserResponse = await client.GetAsync(await CreateNewUserPath());
+            using var client = CreateClient();
+            var userPath = await CreateNewUserPath();
+            await AssertResourceQuantity(client, userPath, resourceName, resourceQuantity);
+        }
+
+        private static async Task AssertResourceQuantity(HttpClient client, string userPath, string resourceName, int resourceQuantity)
+        {
+            var getUserResponse = await GetAsync(userPath);
 
             var user = await getUserResponse.Content.ReadAsAsync<JObject>();
             Assert.Equal(resourceQuantity, user["resourcesQuantity"][resourceName].Value<int>());
