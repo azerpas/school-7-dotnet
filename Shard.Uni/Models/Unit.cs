@@ -60,7 +60,6 @@ namespace Shard.Uni.Models
             DestinationPlanet = planet;
             EstimatedTimeOfArrival = now.ToString("yyyy-MM-ddTHH:mm:sssK");
            
-            // TODO : check for time usage
             clock.CreateTimer(move, this, timeToMove, 0);
         }
 
@@ -69,7 +68,6 @@ namespace Shard.Uni.Models
             Unit unit = (Unit)state;
             System = unit.DestinationSystem;
             Planet = unit.DestinationPlanet;
-            // EstimatedTimeOfArrival = null;
         }
     }
 
