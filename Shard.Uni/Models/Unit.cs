@@ -49,19 +49,19 @@ namespace Shard.Uni.Models
         {
             DateTime now = clock.Now;
             int timeToMove = TimeToLeavePlanet + TimeToEnterPlanet;
-            bool sameSystem = DestinationSystem == system;
+            bool sameSystem = System == system;
             if (!sameSystem)
             {
                 timeToMove += TimeToChangeSystem;
             }
-            now.AddSeconds(Convert.ToDouble(timeToMove));
+            now = now.AddSeconds(Convert.ToDouble(timeToMove));
 
             DestinationSystem = system;
             DestinationPlanet = planet;
             EstimatedTimeOfArrival = now.ToString("yyyy-MM-ddTHH:mm:sssK");
            
             // TODO : check for time usage
-            clock.CreateTimer(move, this, timeToMove, -1);
+            clock.CreateTimer(move, this, timeToMove, 0);
         }
 
         public void move(object state)

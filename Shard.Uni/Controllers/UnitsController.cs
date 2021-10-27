@@ -49,7 +49,7 @@ namespace Shard.Uni.Controllers
                 {
                     DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
                     DateTime now = _clock.Now;
-                    double timeBeforeArrival = arrival.Second - now.Second;
+                    double timeBeforeArrival = (arrival - now).TotalSeconds;
                     if (timeBeforeArrival > 2.0)
                     {   // Contient la destination
                         unit.Planet = null;
