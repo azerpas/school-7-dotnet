@@ -80,11 +80,15 @@ namespace Shard.Uni.Controllers
             _clock.CreateTimer(
                 _ =>
                 {
-                    // GetResourcesByType
+                    ResourceKind resource = planet.GetResourceToMine(createBuilding.ResourceCategory);
+                    // TODO: If resource = 0, Cancel timer
+                    planet.Mine(resource);
+                    // TODO: Add resource to User
                 },
                 null,
                 new TimeSpan(0,5,0),
                 new TimeSpan(0,1,0)
+                // TODO: Cancellation when no more resources
             );
 
             return building;
