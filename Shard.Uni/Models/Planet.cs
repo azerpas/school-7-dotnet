@@ -19,6 +19,16 @@ namespace Shard.Uni.Models
             Size = size;
             ResourceQuantity = resourceQuantity;
         }
+
+        public Dictionary<ResourceKind, int> GetResourcesByType(string type)
+        {
+            switch (type)
+            {
+                // case "solid":
+            }
+            // WIP
+            return new Dictionary<ResourceKind, int>();
+        }
     }
 
     public class PlanetDetailDto

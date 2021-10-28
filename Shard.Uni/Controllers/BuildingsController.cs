@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shard.Shared.Core;
 using Shard.Uni.Models;
 using Shard.Uni.Services;
+using System;
 
 namespace Shard.Uni.Controllers
 {
@@ -11,11 +13,13 @@ namespace Shard.Uni.Controllers
 
         private UserService _userService;
         private readonly SectorService _sectorService;
+        private IClock _clock;
 
-        public BuildingsController(UserService userService, SectorService sectorService)
+        public BuildingsController(UserService userService, SectorService sectorService, IClock clock)
         {
             _userService = userService;
             _sectorService = sectorService;
+            _clock = clock;
         }
 
         // POST /users/{userId}/Buildings
@@ -35,7 +39,7 @@ namespace Shard.Uni.Controllers
             }
 
             // Test BuildingWithIncorrectBuildingTypeSends400
-            if (!Building.getBuildingTypes().Contains(createBuilding.Type))
+            if (!Building.GetBuildingTypes().Contains(createBuilding.Type))
             {
                 return BadRequest("Wrong Building Type");
             }
@@ -55,8 +59,33 @@ namespace Shard.Uni.Controllers
                 return BadRequest("Unit is not over a planet");
             }
 
-            Building building = new Building(createBuilding.Id, "mine", unit.System, unit.Planet);
+            Planet planet = _sectorService.Systems
+                .Find(System => unit.System == System.Name).Planets
+                .Find(Planet => unit.Planet == Planet.Name);
+
+            Building building = new Building(createBuilding.Id, "mine", unit.System, unit.Planet, createBuilding.ResourceCategory, _clock);
             _userService.Buildings[user.Id].Add(building);
+
+            // Built in 5 minutes
+            _clock.CreateTimer(
+                _ => building.IsBuilt = true,
+                null,
+                new TimeSpan(0, 5, 0),
+                new TimeSpan(0)
+            );
+
+            // Then every minute
+            //      - +1 resource to owner
+            //      - -1 resource from planet
+            _clock.CreateTimer(
+                _ =>
+                {
+                    // GetResourcesByType
+                },
+                null,
+                new TimeSpan(0,5,0),
+                new TimeSpan(0,1,0)
+            );
 
             return building;
         }
