@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -139,6 +140,123 @@ namespace Shard.Shared.Web.IntegrationTests
 
             var user = await getUserResponse.Content.ReadAsAsync<JObject>();
             Assert.Equal(resourceQuantity, user["resourcesQuantity"][resourceName].Value<int>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task CanForceResourcesForUser()
+        {
+            using var client = CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes("admin:password")));
+
+            var userPath = await CreateNewUserPath();
+            var user = await (await client.GetAsync(userPath)).Content.ReadAsAsync<JObject>();
+
+            using var response = await client.PutAsJsonAsync(userPath, new
+            {
+                id = user["id"].Value<string>(),
+                resourcesQuantity = new
+                {
+                    aluminium = 421,
+                    carbon = 422,
+                    gold = 423,
+                    iron = 424,
+                    oxygen = 425,
+                    titanium = 426,
+                    water = 427
+                }
+            });
+
+            await response.AssertSuccessStatusCode();
+
+            var updatedUser = await response.Content.ReadAsAsync<JObject>();
+            Assert.Equal(user["id"].Value<string>(), updatedUser["id"].Value<string>());
+            Assert.Equal(user["pseudo"].Value<string>(), updatedUser["pseudo"].Value<string>());
+            Assert.Equal(user["dateOfCreation"].Value<string>(), updatedUser["dateOfCreation"].Value<string>());
+
+            Assert.Equal(421, updatedUser["resourcesQuantity"]["aluminium"].Value<int>());
+            Assert.Equal(422, updatedUser["resourcesQuantity"]["carbon"].Value<int>());
+            Assert.Equal(423, updatedUser["resourcesQuantity"]["gold"].Value<int>());
+            Assert.Equal(424, updatedUser["resourcesQuantity"]["iron"].Value<int>());
+            Assert.Equal(425, updatedUser["resourcesQuantity"]["oxygen"].Value<int>());
+            Assert.Equal(426, updatedUser["resourcesQuantity"]["titanium"].Value<int>());
+            Assert.Equal(427, updatedUser["resourcesQuantity"]["water"].Value<int>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task CanForceSomeResourcesForUser()
+        {
+            using var client = CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes("admin:password")));
+
+            var userPath = await CreateNewUserPath();
+            var user = await (await client.GetAsync(userPath)).Content.ReadAsAsync<JObject>();
+
+            using var response = await client.PutAsJsonAsync(userPath, new
+            {
+                id = user["id"].Value<string>(),
+                resourcesQuantity = new
+                {
+                    carbon = 422,
+                    gold = 423,
+                }
+            });
+
+            await response.AssertSuccessStatusCode();
+
+            var updatedUser = await response.Content.ReadAsAsync<JObject>();
+            Assert.Equal(user["id"].Value<string>(), updatedUser["id"].Value<string>());
+            Assert.Equal(user["pseudo"].Value<string>(), updatedUser["pseudo"].Value<string>());
+            Assert.Equal(user["dateOfCreation"].Value<string>(), updatedUser["dateOfCreation"].Value<string>());
+
+            Assert.Equal(0, updatedUser["resourcesQuantity"]["aluminium"].Value<int>());
+            Assert.Equal(422, updatedUser["resourcesQuantity"]["carbon"].Value<int>());
+            Assert.Equal(423, updatedUser["resourcesQuantity"]["gold"].Value<int>());
+            Assert.Equal(10, updatedUser["resourcesQuantity"]["iron"].Value<int>());
+            Assert.Equal(50, updatedUser["resourcesQuantity"]["oxygen"].Value<int>());
+            Assert.Equal(0, updatedUser["resourcesQuantity"]["titanium"].Value<int>());
+            Assert.Equal(50, updatedUser["resourcesQuantity"]["water"].Value<int>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task IgnoreResourcesUpdateIfNotAdmin()
+        {
+            using var client = CreateClient();
+
+            var userPath = await CreateNewUserPath();
+            var user = await (await client.GetAsync(userPath)).Content.ReadAsAsync<JObject>();
+
+            using var response = await client.PutAsJsonAsync(userPath, new
+            {
+                id = user["id"].Value<string>(),
+                resourcesQuantity = new
+                {
+                    carbon = 422,
+                    gold = 423,
+                }
+            });
+
+            await response.AssertSuccessStatusCode();
+
+            var updatedUser = await response.Content.ReadAsAsync<JObject>();
+            Assert.Equal(user["id"].Value<string>(), updatedUser["id"].Value<string>());
+            Assert.Equal(user["pseudo"].Value<string>(), updatedUser["pseudo"].Value<string>());
+            Assert.Equal(user["dateOfCreation"].Value<string>(), updatedUser["dateOfCreation"].Value<string>());
+
+            Assert.Equal(0, updatedUser["resourcesQuantity"]["aluminium"].Value<int>());
+            Assert.Equal(20, updatedUser["resourcesQuantity"]["carbon"].Value<int>());
+            Assert.Equal(0, updatedUser["resourcesQuantity"]["gold"].Value<int>());
+            Assert.Equal(10, updatedUser["resourcesQuantity"]["iron"].Value<int>());
+            Assert.Equal(50, updatedUser["resourcesQuantity"]["oxygen"].Value<int>());
+            Assert.Equal(0, updatedUser["resourcesQuantity"]["titanium"].Value<int>());
+            Assert.Equal(50, updatedUser["resourcesQuantity"]["water"].Value<int>());
         }
     }
 }
