@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.TestHost;
+﻿using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using Shard.Shared.Core;
@@ -76,6 +76,18 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "2")]
         public Task GettingScoutStatusWithWrongIdReturns404()
             => GettingUnitStatusWithWrongIdReturns404("scout");
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public Task PutNonExistingScoutAsUnauthenticated()
+            => PutNonExistingUnitAsUnauthenticated("scout");
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public Task PutNonExistingScoutAsAdministrator()
+            => PutNonExistingUnitAsAdministrator("scout");
 
         [Fact]
         [Trait("grading", "true")]

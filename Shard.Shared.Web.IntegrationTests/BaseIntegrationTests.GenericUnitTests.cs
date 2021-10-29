@@ -58,6 +58,58 @@ namespace Shard.Shared.Web.IntegrationTests
             await response.AssertStatusEquals(HttpStatusCode.NotFound);
         }
 
+        public async Task PutNonExistingUnitAsUnauthenticated(string unitType)
+        {
+            using var client = CreateClient();
+            using var response = (await CreateUnit(client, unitType)).Item1;
+
+            await response.AssertStatusEquals(HttpStatusCode.Unauthorized);
+        }
+
+        public async Task PutNonExistingUnitAsAdministrator(string unitType)
+        {
+            using var client = CreateClient();
+            client.DefaultRequestHeaders.Authorization = CreateAdminAuthorizationHeader();
+
+            var (response, system, planet) = (await CreateUnit(client, unitType));
+            using (response)
+
+            {
+
+                await response.AssertSuccessStatusCode();
+
+                var unit = await response.Content.ReadAsAsync<JObject>();
+
+                Assert.NotNull(unit["id"].Value<string>());
+
+                Assert.Equal(system, unit["system"].Value<string>());
+
+                Assert.Equal(planet, unit["planet"].Value<string>());
+
+                Assert.Equal(system, unit["destinationSystem"].Value<string>());
+
+                Assert.Equal(planet, unit["destinationPlanet"].Value<string>());
+
+            }
+        }
+
+        public async Task<(HttpResponseMessage, string, string)> CreateUnit(HttpClient client, string unitType)
+        {
+            var userPath = await CreateNewUserPath();
+            var unitId = Guid.NewGuid();
+
+            var originSystem = await GetRandomSystemOtherThan(null);
+            var originPlanet = await GetSomePlanetInSystem(originSystem);
+
+            return (await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
+            {
+                id = unitId,
+                Type = unitType,
+                System = originSystem,
+                Planet = originPlanet
+            }), originSystem, originPlanet);
+        }
+
         public async Task MoveUnitToOtherSystem(string unitType)
         {
             var userPath = await CreateNewUserPath();
