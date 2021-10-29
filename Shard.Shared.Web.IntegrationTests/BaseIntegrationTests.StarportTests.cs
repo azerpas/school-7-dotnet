@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -196,6 +197,73 @@ namespace Shard.Shared.Web.IntegrationTests
                 type = "scout"
             });
             await response.AssertStatusEquals(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutIfNotEnoughResourcesReturns400()
+        {
+            using var client = CreateClient();
+
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+            using var putResourceResponse = await PutResources(userPath, new
+            {
+                carbon = 0,
+                iron = 0,
+            });
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutIfNotEnoughIronDoesNotSpendCarbon()
+        {
+            using var client = CreateClient();
+
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+            using var putResourceResponse = await PutResources(userPath, new
+            {
+                carbon = 20,
+                iron = 0,
+            });
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.BadRequest);
+            await AssertResourceQuantity(client, userPath, "carbon", 20);
+            await AssertResourceQuantity(client, userPath, "iron", 0);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutIfNotEnoughCarbonDoesNotSpendIron()
+        {
+            using var client = CreateClient();
+
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+            using var putResourceResponse = await PutResources(userPath, new
+            {
+                carbon = 0,
+                iron = 10,
+            });
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.BadRequest);
+            await AssertResourceQuantity(client, userPath, "carbon", 0);
+            await AssertResourceQuantity(client, userPath, "iron", 10);
         }
     }
 }

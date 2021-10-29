@@ -148,25 +148,18 @@ namespace Shard.Shared.Web.IntegrationTests
         public async Task CanForceResourcesForUser()
         {
             using var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes("admin:password")));
-
             var userPath = await CreateNewUserPath();
             var user = await (await client.GetAsync(userPath)).Content.ReadAsAsync<JObject>();
 
-            using var response = await client.PutAsJsonAsync(userPath, new
+            using var response = await PutResources(userPath, new
             {
-                id = user["id"].Value<string>(),
-                resourcesQuantity = new
-                {
-                    aluminium = 421,
-                    carbon = 422,
-                    gold = 423,
-                    iron = 424,
-                    oxygen = 425,
-                    titanium = 426,
-                    water = 427
-                }
+                aluminium = 421,
+                carbon = 422,
+                gold = 423,
+                iron = 424,
+                oxygen = 425,
+                titanium = 426,
+                water = 427
             });
 
             await response.AssertSuccessStatusCode();
@@ -191,29 +184,17 @@ namespace Shard.Shared.Web.IntegrationTests
         public async Task CanForceSomeResourcesForUser()
         {
             using var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes("admin:password")));
-
             var userPath = await CreateNewUserPath();
-            var user = await (await client.GetAsync(userPath)).Content.ReadAsAsync<JObject>();
 
-            using var response = await client.PutAsJsonAsync(userPath, new
+            using var response = await PutResources(userPath, new
             {
-                id = user["id"].Value<string>(),
-                resourcesQuantity = new
-                {
-                    carbon = 422,
-                    gold = 423,
-                }
+                carbon = 422,
+                gold = 423,
             });
 
             await response.AssertSuccessStatusCode();
 
             var updatedUser = await response.Content.ReadAsAsync<JObject>();
-            Assert.Equal(user["id"].Value<string>(), updatedUser["id"].Value<string>());
-            Assert.Equal(user["pseudo"].Value<string>(), updatedUser["pseudo"].Value<string>());
-            Assert.Equal(user["dateOfCreation"].Value<string>(), updatedUser["dateOfCreation"].Value<string>());
-
             Assert.Equal(0, updatedUser["resourcesQuantity"]["aluminium"].Value<int>());
             Assert.Equal(422, updatedUser["resourcesQuantity"]["carbon"].Value<int>());
             Assert.Equal(423, updatedUser["resourcesQuantity"]["gold"].Value<int>());
@@ -221,6 +202,26 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.Equal(50, updatedUser["resourcesQuantity"]["oxygen"].Value<int>());
             Assert.Equal(0, updatedUser["resourcesQuantity"]["titanium"].Value<int>());
             Assert.Equal(50, updatedUser["resourcesQuantity"]["water"].Value<int>());
+        }
+
+        private async Task<HttpResponseMessage> PutResources(string userPath, object resources)
+        {
+            using var client = CreateClient();
+            client.DefaultRequestHeaders.Authorization = CreateAdminAuthorizationHeader();
+
+            var user = await (await client.GetAsync(userPath)).Content.ReadAsAsync<JObject>();
+
+            return await client.PutAsJsonAsync(userPath, new
+            {
+                id = user["id"].Value<string>(),
+                resourcesQuantity = resources
+            });
+        }
+
+        private static AuthenticationHeaderValue CreateAdminAuthorizationHeader()
+        {
+            return new AuthenticationHeaderValue(
+                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes("admin:password")));
         }
 
         [Fact]
