@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Shard.Uni.Models;
 using Shard.Uni.Services;
 
@@ -32,6 +33,13 @@ namespace Shard.Uni.Controllers
             if(createBuilding.BuilderId == null)
             {
                 return BadRequest("Please input a builder id");
+            }
+
+            // Fixing missing id in Test `CanBuildMineOnPlanet`
+            // https://gitlab.com/efrei-p2023/efrei-p2023-csharp/-/issues/1
+            if (createBuilding.Id == null)
+            {
+                createBuilding.Id = Guid.NewGuid().ToString();
             }
 
             // Test BuildingWithIncorrectBuildingTypeSends400
