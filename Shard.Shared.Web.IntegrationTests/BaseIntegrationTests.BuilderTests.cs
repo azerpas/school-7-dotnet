@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,29 +133,6 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.Equal(builder["planet"].Value<string>(), building["planet"].Value<string>());
         }
 
-        [Fact]
-        [Trait("grading", "true")]
-        [Trait("version", "5")]
-        public async Task CanBuildStarportOnPlanet()
-        {
-            using var client = CreateClient();
-            var (userPath, builder) = await SendUnitToPlanet(client, "builder");
-
-            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
-            {
-                builderId = builder["id"].Value<string>(),
-                type = "starport",
-                resourceCategory = "solid"
-            });
-            await response.AssertSuccessStatusCode();
-
-            var building = await response.Content.ReadAsAsync<JObject>();
-            Assert.NotNull(building["id"].Value<string>());
-            Assert.Equal("starport", building["type"].Value<string>());
-            Assert.Equal(builder["system"].Value<string>(), building["system"].Value<string>());
-            Assert.Equal(builder["planet"].Value<string>(), building["planet"].Value<string>());
-        }
-
         [Theory]
         [Trait("grading", "true")]
         [Trait("version", "4")]
@@ -198,6 +175,22 @@ namespace Shard.Shared.Web.IntegrationTests
             {
                 builderId = builder["id"].Value<string>(),
                 type = "mine",
+                resourceCategory = "solid"
+            });
+            await response.AssertSuccessStatusCode();
+
+            var building = await response.Content.ReadAsAsync<JObject>();
+            return (userPath, builder, building);
+        }
+
+        private async Task<(string, JObject, JObject)> BuildStarport(HttpClient client)
+        {
+            var (userPath, builder) = await SendUnitToPlanet(client, "builder");
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
+            {
+                builderId = builder["id"].Value<string>(),
+                type = "starport",
                 resourceCategory = "solid"
             });
             await response.AssertSuccessStatusCode();
@@ -334,5 +327,52 @@ namespace Shard.Shared.Web.IntegrationTests
         [Trait("version", "3")]
         public Task GetBuilder_IfLessOrEqualThan2secAway_WaitsUntilArrived()
             => GetUnit_IfLessOrEqualThan2secAway_WaitsUntilArrived("builder");
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task CanBuildStarportOnPlanet()
+        {
+            using var client = CreateClient();
+            var (userPath, builder) = await SendUnitToPlanet(client, "builder");
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
+            {
+                builderId = builder["id"].Value<string>(),
+                type = "starport",
+                resourceCategory = "solid"
+            });
+            await response.AssertSuccessStatusCode();
+
+            var building = await response.Content.ReadAsAsync<JObject>();
+            Assert.NotNull(building["id"].Value<string>());
+            Assert.Equal("starport", building["type"].Value<string>());
+            Assert.Equal(builder["system"].Value<string>(), building["system"].Value<string>());
+            Assert.Equal(builder["planet"].Value<string>(), building["planet"].Value<string>());
+            Assert.False(building["isBuilt"].Value<bool>());
+            Assert.Equal(fakeClock.Now.AddMinutes(5), building["estimatedBuildTime"].Value<DateTime>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task StarportDoesNotContainResourceCategory()
+        {
+            using var client = CreateClient();
+            var (userPath, builder) = await SendUnitToPlanet(client, "builder");
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings", new
+            {
+                builderId = builder["id"].Value<string>(),
+                type = "starport",
+                resourceCategory = "solid"
+            });
+            await response.AssertSuccessStatusCode();
+
+            var building = await response.Content.ReadAsAsync<JObject>();
+            Assert.True(
+                !building.ContainsKey("resourceCategory")
+                || building["resourceCategory"].Type == JTokenType.Null);
+        }
     }
 }
