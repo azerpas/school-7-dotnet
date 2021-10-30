@@ -4,6 +4,8 @@ using Shard.Uni.Models;
 using Shard.Uni.Services;
 using Xunit;
 using Shard.Shared.Core;
+using Shard.Shared.Web.IntegrationTests.Clock;
+using System.Threading.Tasks;
 
 namespace Shard.Uni.Tests
 {
@@ -12,12 +14,14 @@ namespace Shard.Uni.Tests
 
         UserService _userService;
         SectorService _sectorService;
+        FakeClock _fakeClock;
 
         public UserUnitTests()
         {
             _userService = new UserService();
             _sectorService = new SectorService(new MapGenerator(new MapGeneratorOptions { Seed = "Uni" }));
-        }
+            _fakeClock = new FakeClock();
+    }
 
         [Fact]
         public void NoUsersOnStartUp()
@@ -37,7 +41,7 @@ namespace Shard.Uni.Tests
             Assert.Contains(System.DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm"), _userService.Users[0].DateOfCreation);
         }
 
-        [Fact(Skip = "No yet implemented")]
+        [Fact]
         public void UnitGenerated()
         {
             string uuid = Guid.NewGuid().ToString();
@@ -53,6 +57,24 @@ namespace Shard.Uni.Tests
             Assert.Matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}", _userService.Units[user.Id][0].Id);
             Assert.Equal("scout", _userService.Units[user.Id][0].Type);
             Assert.Equal(planet.Name, _userService.Units[user.Id][0].Planet);
+        }
+
+        [Fact]
+        public async Task MoveUnit()
+        {
+            Random random = new Random();
+            int index = random.Next(_sectorService.Systems.Count);
+            StarSystem system = _sectorService.Systems[index];
+            index = random.Next(system.Planets.Count);
+            Planet fromPlanet = system.Planets[index];
+            index = random.Next(system.Planets.Count);
+            Planet toPlanet = system.Planets[index];
+
+            Unit unit = new Unit("scout", system.Name, fromPlanet.Name);
+            unit.MoveTo(system.Name, toPlanet.Name, _fakeClock);
+
+            await _fakeClock.Advance(new TimeSpan(0, 0, 15));
+            Assert.Equal(unit.Planet, toPlanet.Name);
         }
     }
 }
