@@ -106,7 +106,7 @@ namespace Shard.Uni.Controllers
                     user.ResourcesQuantity[resource] = user.ResourcesQuantity[resource] + 1;
                 },
                 null,
-                new TimeSpan(0, 5, 0), // in 5 minutes ...
+                new TimeSpan(0, 6, 0), // in 6 minutes (we start one minute after build has ended) ...
                 new TimeSpan(0, 1, 0) // ... execute the code above every minute
             );
 
