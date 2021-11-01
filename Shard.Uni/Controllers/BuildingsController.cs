@@ -172,7 +172,12 @@ namespace Shard.Uni.Controllers
                         {
                             int delay = Convert.ToInt32((finishedAt - _clock.Now).TotalMilliseconds);
                             await _clock.Delay(delay);
-                            return _userService.Buildings[userId].Find(Building => Building.Id == buildingId);
+                            building = _userService.Buildings[userId].Find(Building => Building.Id == buildingId);
+                            if(building == null)
+                            { // If building has been moved during the 2sec delay
+                                return NotFound();
+                            }
+                            else return building;
                         }
                         else
                         {
