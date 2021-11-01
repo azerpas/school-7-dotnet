@@ -11,10 +11,11 @@ namespace Shard.Uni.Models
         public string System { get; set; }
         public string Planet { get; set; }
         public bool? IsBuilt { get; set; }
-        public string EstimatedBuildTime { get; set; }
+        public string? EstimatedBuildTime { get; set; }
+        public string? BuilderId { get; set; }
         public string ResourceCategory { get; set; }
 
-        public Building(string id, string type, string system, string planet, string resourceCategory, IClock clock)
+        public Building(string id, string type, string system, string planet, string resourceCategory, string builderId, IClock clock)
         {
             Id = id;
             Type = type;
@@ -22,6 +23,7 @@ namespace Shard.Uni.Models
             Planet = planet;
             ResourceCategory = resourceCategory;
             IsBuilt = false;
+            BuilderId = builderId;
             EstimatedBuildTime = clock.Now.AddMinutes(5.0).ToString("yyyy-MM-ddTHH:mm:sssK");
         }
 

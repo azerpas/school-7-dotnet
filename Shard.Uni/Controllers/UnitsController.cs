@@ -112,6 +112,18 @@ namespace Shard.Uni.Controllers
                 
                 bool sameSystem = spaceship.DestinationSystem == spaceship.System;
                 spaceship.MoveTo(system: destinationSystem.Name, planet: destinationPlanet?.Name, _clock);
+
+                if(!sameSystem || destinationPlanet?.Name != spaceship.Planet)
+                {
+                    // Cancel current constructions
+                    List<Building> buildingsBuilt = _userService.Buildings[userId].FindAll(
+                        Building => Building.BuilderId == spaceship.Id
+                    );
+                    foreach (Building building in buildingsBuilt)
+                    {
+                        _userService.Buildings[userId].RemoveAll(Building => Building.Id == building.Id);
+                    }
+                }
             }
             return spaceship;
         }

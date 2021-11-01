@@ -72,12 +72,16 @@ namespace Shard.Uni.Controllers
                 .Find(System => unit.System == System.Name).Planets
                 .Find(Planet => unit.Planet == Planet.Name);
 
-            Building building = new Building(createBuilding.Id, "mine", unit.System, unit.Planet, createBuilding.ResourceCategory, _clock);
+            Building building = new Building(createBuilding.Id, "mine", unit.System, unit.Planet, createBuilding.ResourceCategory, createBuilding.BuilderId, _clock);
             _userService.Buildings[user.Id].Add(building);
 
             // Built in 5 minutes
             _clock.CreateTimer(
-                _ => building.IsBuilt = true,
+                _ => {
+                    building.IsBuilt = true;
+                    building.EstimatedBuildTime = null;
+                    building.BuilderId = null;
+                },
                 null,
                 new TimeSpan(0, 5, 0),
                 new TimeSpan(0)
@@ -89,6 +93,10 @@ namespace Shard.Uni.Controllers
             _clock.CreateTimer(
                 _ =>
                 {
+                    if(building == null)
+                    { // in case we've cancelled the building construction by moving
+                        return;
+                    }
                     if (building.IsBuilt != true)
                     {
                         return;
@@ -156,7 +164,6 @@ namespace Shard.Uni.Controllers
                     double timeBeforeBuildingReady = (finishedAt - now).TotalSeconds;
                     if (timeBeforeBuildingReady > 2.0)
                     {
-                        building.IsBuilt = null;
                         return building;
                     }
                     else
