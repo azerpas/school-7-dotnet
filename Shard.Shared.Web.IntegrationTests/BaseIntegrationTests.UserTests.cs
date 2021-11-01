@@ -135,7 +135,7 @@ namespace Shard.Shared.Web.IntegrationTests
 
         private static async Task AssertResourceQuantity(HttpClient client, string userPath, string resourceName, int resourceQuantity)
         {
-            var getUserResponse = await GetAsync(userPath);
+            var getUserResponse = await client.GetAsync(userPath);
 
             var user = await getUserResponse.Content.ReadAsAsync<JObject>();
             Assert.Equal(resourceQuantity, user["resourcesQuantity"][resourceName].Value<int>());
