@@ -10,7 +10,7 @@ namespace Shard.Uni.Models
         public string Type { get; set; }
         public string System { get; set; }
         public string Planet { get; set; }
-        public bool IsBuilt { get; set; }
+        public bool? IsBuilt { get; set; }
         public string EstimatedBuildTime { get; set; }
         public string ResourceCategory { get; set; }
 

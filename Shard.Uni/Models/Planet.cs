@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Shard.Shared.Core;
 
@@ -21,7 +22,7 @@ namespace Shard.Uni.Models
             ResourceQuantity = resourceQuantity;
         }
 
-        public List<ResourceKind> GetGazResourcesKind() => new List<ResourceKind>
+        public List<ResourceKind> GetGaseousResourcesKind() => new List<ResourceKind>
         {
             ResourceKind.Oxygen
         };
@@ -52,7 +53,7 @@ namespace Shard.Uni.Models
                     // Foreach quicker than LINQ
                     foreach (KeyValuePair<ResourceKind, int> resource in ResourceQuantity)
                     {
-                        if (!GetSolidResourcesKind().Contains(resource.Key))
+                        if (GetSolidResourcesKind().Contains(resource.Key))
                         {
                             // First iteration, check if its already a solid resource
                             if (!GetSolidResourcesKind().Contains(resourceToMine.Key))
@@ -69,10 +70,10 @@ namespace Shard.Uni.Models
                     return resourceToMine.Key;
                 case "liquid":
                     return ResourceKind.Water;
-                case "gaz":
+                case "gaseous":
                     return ResourceKind.Oxygen;
                 default:
-                    throw new System.Exception("Resource type not found, available are: solid, liquid, gaz");
+                    throw new System.Exception("Resource type not found, available are: solid, liquid, gaseous");
             }
         }
 
@@ -80,7 +81,7 @@ namespace Shard.Uni.Models
         {
             if(ResourceQuantity[resourceKind] == 0)
             {
-                throw new System.Exception("No more resources are available");
+                throw new NoResourcesAvailableException("No more resources are available");
             }
             else
             {
@@ -99,5 +100,14 @@ namespace Shard.Uni.Models
             Name = name;
             Size = size;
         }
+    }
+
+    public class NoResourcesAvailableException : Exception
+    {
+        public NoResourcesAvailableException() { }
+
+        public NoResourcesAvailableException(string message) : base(message) { }
+
+        public NoResourcesAvailableException(string message, Exception exception) : base(message, exception) { }
     }
 }

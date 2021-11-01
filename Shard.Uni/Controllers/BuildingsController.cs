@@ -3,6 +3,8 @@ using Shard.Shared.Core;
 using Shard.Uni.Models;
 using Shard.Uni.Services;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Shard.Uni.Controllers
 {
@@ -33,7 +35,7 @@ namespace Shard.Uni.Controllers
                 return NotFound("User not found");
             }
 
-            if(createBuilding.BuilderId == null)
+            if (createBuilding.BuilderId == null)
             {
                 return BadRequest("Please input a builder id");
             }
@@ -87,19 +89,93 @@ namespace Shard.Uni.Controllers
             _clock.CreateTimer(
                 _ =>
                 {
+                    if (building.IsBuilt != true)
+                    {
+                        return;
+                    }
                     ResourceKind resource = planet.GetResourceToMine(createBuilding.ResourceCategory);
-                    // TODO: If resource = 0, Cancel timer
-                    planet.Mine(resource);
-                    // TODO: Add resource to User
+                    try
+                    {
+                        planet.Mine(resource);
+                    }
+                    catch (NoResourcesAvailableException)
+                    {
+                        Console.WriteLine($"[WARNING] No more resources are available for resource {resource.ToString()}");
+                        return;
+                    }
+                    user.ResourcesQuantity[resource] = user.ResourcesQuantity[resource] + 1;
                 },
                 null,
-                new TimeSpan(0,5,0),
-                new TimeSpan(0,1,0)
-                // TODO: Cancellation when no more resources
+                new TimeSpan(0, 5, 0), // in 5 minutes ...
+                new TimeSpan(0, 1, 0) // ... execute the code above every minute
             );
 
             return building;
         }
+
+        // GET /users/{userId}/Buildings
+        [HttpGet("/users/{userId}/Buildings")]
+        public ActionResult<List<Building>> Get(string userId)
+        {
+            User user = _userService.Users.Find(user => user.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return _userService.Buildings[user.Id];
+        }
+
+        // GET /users/{userId}/Buildings/{buildingId}
+        [HttpGet("/users/{userId}/Buildings/{buildingId}")]
+        public async Task<ActionResult<Building>> Get(string userId, string buildingId)
+        {
+            User user = _userService.Users.Find(user => user.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            List<Building> buildings = _userService.Buildings[user.Id];
+
+            Building building = buildings.Find(Building => Building.Id == buildingId);
+
+            if (building == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                if (building.EstimatedBuildTime != null)
+                {
+                    DateTime finishedAt = DateTime.Parse(building.EstimatedBuildTime);
+                    DateTime now = _clock.Now;
+
+                    double timeBeforeBuildingReady = (finishedAt - now).TotalSeconds;
+                    if (timeBeforeBuildingReady > 2.0)
+                    {
+                        building.IsBuilt = null;
+                        return building;
+                    }
+                    else
+                    {
+                        if (timeBeforeBuildingReady > 0 && timeBeforeBuildingReady <= 2)
+                        {
+                            int delay = Convert.ToInt32((finishedAt - _clock.Now).TotalMilliseconds);
+                            await _clock.Delay(delay);
+                            return _userService.Buildings[userId].Find(Building => Building.Id == buildingId);
+                        }
+                        else
+                        {
+                            return building;
+                        }
+
+                    }
+                }
+                else return building;
+            }
+        }
     }
 }
-
