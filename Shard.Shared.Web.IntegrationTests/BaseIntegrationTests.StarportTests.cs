@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Net;
@@ -69,6 +69,133 @@ namespace Shard.Shared.Web.IntegrationTests
             Assert.True(building["isBuilt"].Value<bool>());
             Assert.True(!building.ContainsKey("estimatedBuildTime")
                 || building["estimatedBuildTime"].Type == JTokenType.Null);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutOnBuiltStarportImmediatlyReturnsOne()
+        {
+            using var client = CreateClient();
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertSuccessStatusCode();
+
+            var unit = await response.Content.ReadAsAsync<JObject>();
+            Assert.NotNull(unit["id"].Value<string>());
+            Assert.Equal("scout", unit["type"].Value<string>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutOnBuiltStarportCost5Carbon5Iron()
+        {
+            using var client = CreateClient();
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+
+            await AssertResourceQuantity(client, userPath, "carbon", 20);
+            await AssertResourceQuantity(client, userPath, "iron", 10);
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertSuccessStatusCode();
+            await AssertResourceQuantity(client, userPath, "carbon", 15);
+            await AssertResourceQuantity(client, userPath, "iron", 5);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingBuilderOnBuiltStarportCost5Carbon10Iron()
+        {
+            using var client = CreateClient();
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+
+            await AssertResourceQuantity(client, userPath, "carbon", 20);
+            await AssertResourceQuantity(client, userPath, "iron", 10);
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "builder"
+            });
+            await response.AssertSuccessStatusCode();
+            await AssertResourceQuantity(client, userPath, "carbon", 15);
+            await AssertResourceQuantity(client, userPath, "iron", 0);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutForInvalidUserReturns404()
+        {
+            using var client = CreateClient();
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+            var response = await client.PostAsJsonAsync($"{userPath}z/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutForInvalidBuildingReturns404()
+        {
+            using var client = CreateClient();
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}z/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutOnMineReturns400()
+        {
+            using var client = CreateClient();
+            var (userPath, _, originalBuilding) = await BuildMine(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "5")]
+        public async Task QueuingScoutOnUnBuiltStarportReturns400()
+        {
+            using var client = CreateClient();
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "scout"
+            });
+            await response.AssertStatusEquals(HttpStatusCode.BadRequest);
         }
     }
 }
