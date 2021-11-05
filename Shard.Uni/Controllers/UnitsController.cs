@@ -121,6 +121,9 @@ namespace Shard.Uni.Controllers
                     );
                     foreach (Building building in buildingsBuilt)
                     {
+                        // Cancel any Task related to the building
+                        building.TokenSource.Cancel();
+                        // Remove the building from the list of buildings
                         _userService.Buildings[userId].RemoveAll(Building => Building.Id == building.Id);
                     }
                 }

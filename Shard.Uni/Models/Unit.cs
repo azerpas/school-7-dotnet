@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using Shard.Shared.Core;
+using Shard.Uni.Services;
 
 namespace Shard.Uni.Models
 {

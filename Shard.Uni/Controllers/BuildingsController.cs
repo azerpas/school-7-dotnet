@@ -76,47 +76,7 @@ namespace Shard.Uni.Controllers
             _userService.Buildings[user.Id].Add(building);
 
             // Built in 5 minutes
-            _clock.CreateTimer(
-                _ => {
-                    building.IsBuilt = true;
-                    building.EstimatedBuildTime = null;
-                    building.BuilderId = null;
-                },
-                null,
-                new TimeSpan(0, 5, 0),
-                new TimeSpan(0)
-            );
-
-            // Then every minute
-            //      - +1 resource to owner
-            //      - -1 resource from planet
-            _clock.CreateTimer(
-                _ =>
-                {
-                    if(building == null)
-                    { // in case we've cancelled the building construction by moving
-                        return;
-                    }
-                    if (building.IsBuilt != true)
-                    {
-                        return;
-                    }
-                    ResourceKind resource = planet.GetResourceToMine(createBuilding.ResourceCategory);
-                    try
-                    {
-                        planet.Mine(resource);
-                    }
-                    catch (NoResourcesAvailableException)
-                    {
-                        Console.WriteLine($"[WARNING] No more resources are available for resource {resource.ToString()}");
-                        return;
-                    }
-                    user.ResourcesQuantity[resource] = user.ResourcesQuantity[resource] + 1;
-                },
-                null,
-                new TimeSpan(0, 6, 0), // in 6 minutes (we start one minute after build has ended) ...
-                new TimeSpan(0, 1, 0) // ... execute the code above every minute
-            );
+            building.StartConstruction(_clock, planet, user, createBuilding.ResourceCategory);
 
             return building;
         }
@@ -168,10 +128,19 @@ namespace Shard.Uni.Controllers
                     }
                     else
                     {
-                        if (timeBeforeBuildingReady > 0 && timeBeforeBuildingReady <= 2)
+                        if (timeBeforeBuildingReady >= 0 && timeBeforeBuildingReady <= 2)
                         {
-                            int delay = Convert.ToInt32((finishedAt - _clock.Now).TotalMilliseconds);
-                            await _clock.Delay(delay);
+                            building = _userService.Buildings[userId].Find(Building => Building.Id == buildingId);
+                            // int delay = Convert.ToInt32((finishedAt - _clock.Now).TotalMilliseconds);
+                            try
+                            {
+                                await building.Construction;
+                            }
+                            catch(TaskCanceledException ex)
+                            {
+                                return NotFound();
+                            }
+                            
                             building = _userService.Buildings[userId].Find(Building => Building.Id == buildingId);
                             if(building == null)
                             { // If building has been moved during the 2sec delay
