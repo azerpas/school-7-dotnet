@@ -47,26 +47,17 @@ namespace Shard.Uni.Controllers
                 createBuilding.Id = Guid.NewGuid().ToString();
             }
 
-            // Test BuildingWithIncorrectBuildingTypeSends400
-            if (!Building.GetBuildingTypes().Contains(createBuilding.Type))
-            {
-                return BadRequest("Wrong Building Type");
-            }
+            if (!Building.GetBuildingTypes().Contains(createBuilding.Type)) return BadRequest("Wrong Building Type");
 
             Unit unit = _userService.Units[user.Id].Find(Unit => Unit.Id == createBuilding.BuilderId);
 
-            if (unit == null)
-            {
-                // FIXME: test BuildingWithIncorrectBuilderIdSend400 says we need to return 400?
-                // Should be 404
-                return BadRequest("Unit not found");
-            }
+            // FIXME: test BuildingWithIncorrectBuilderIdSend400 says we need to return 400?
+            // Should be 404
+            if (unit == null) return BadRequest("Unit not found");
 
-            // Test BuildingWithUnitNotOverPlanetSends404
-            if (unit.Planet == null)
-            {
-                return BadRequest("Unit is not over a planet");
-            }
+            if (unit.Type != "builder") return BadRequest("Unit is not a builder");
+
+            if (unit.Planet == null) return BadRequest("Unit is not over a planet");
 
             Planet planet = _sectorService.Systems
                 .Find(System => unit.System == System.Name).Planets
@@ -131,7 +122,6 @@ namespace Shard.Uni.Controllers
                         if (timeBeforeBuildingReady >= 0 && timeBeforeBuildingReady <= 2)
                         {
                             building = _userService.Buildings[userId].Find(Building => Building.Id == buildingId);
-                            // int delay = Convert.ToInt32((finishedAt - _clock.Now).TotalMilliseconds);
                             try
                             {
                                 await building.Construction;

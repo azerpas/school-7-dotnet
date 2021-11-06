@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Shard.Uni.Models;
 using Shard.Uni.Services;
+using Shard.Uni.Tests;
 using Xunit;
 using Shard.Shared.Core;
 using Shard.Shared.Web.IntegrationTests.Clock;
@@ -15,12 +16,73 @@ namespace Shard.Uni.Tests
         UserService _userService;
         SectorService _sectorService;
         FakeClock _fakeClock;
+        UserUnitTests _userUnitTests;
 
         public BuildingUnitTests()
         {
             _userService = new UserService();
             _sectorService = new SectorService(new MapGenerator(new MapGeneratorOptions { Seed = "Uni" }));
             _fakeClock = new FakeClock();
+            _userUnitTests = new UserUnitTests();
+        }
+
+        public Unit GetUnit(string type)
+        {
+            Random random = new Random();
+            int index = random.Next(_sectorService.Systems.Count);
+            StarSystem system = _sectorService.Systems[index];
+            index = random.Next(system.Planets.Count);
+            Planet planet = system.Planets[index];
+            return new Unit(type, system.Name, planet.Name);
+        }
+
+        [Fact]
+        public void CanStartAConstruction()
+        {
+            Unit unit = GetUnit("scout");
+            User user = _userUnitTests.GetUser();
+            Planet planet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == unit.Planet);
+            Building building = new Building(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, "solid", unit.Id, _fakeClock);
+            building.StartConstruction(_fakeClock, planet, user, "solid");
+            Assert.Equal(TaskStatus.WaitingForActivation, building.Construction.Status);
+        }
+
+        [Fact]
+        public async void MineIsBuilt_After5minOfConstruction()
+        {
+            Unit unit = GetUnit("scout");
+            User user = _userUnitTests.GetUser();
+            Planet planet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == unit.Planet);
+            Building building = new Building(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, "solid", unit.Id, _fakeClock);
+            building.StartConstruction(_fakeClock, planet, user, "solid");
+            await _fakeClock.Advance(new TimeSpan(0, 5, 0));
+            await building.Construction;
+            Assert.True(building.IsBuilt);
+        }
+
+        [Fact]
+        public async void MineResourcesOnAPlanet_DecreasePlanetResources()
+        {
+            Unit unit = GetUnit("scout");
+            User user = _userUnitTests.GetUser();
+            Planet planet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == unit.Planet);
+            planet.ResourceQuantity[ResourceKind.Gold] = 45;
+            planet.ResourceQuantity[ResourceKind.Iron] = 120;
+            planet.ResourceQuantity[ResourceKind.Titanium] = 50;
+            Building building = new Building(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, "solid", unit.Id, _fakeClock);
+            building.StartConstruction(_fakeClock, planet, user, "solid");
+            await _fakeClock.Advance(new TimeSpan(0, 5, 0));
+            await building.Construction;
+            Assert.Equal(45, planet.ResourceQuantity[ResourceKind.Gold]);
+            Assert.Equal(50, planet.ResourceQuantity[ResourceKind.Titanium]);
+            Assert.Equal(120, planet.ResourceQuantity[ResourceKind.Iron]);
+            await _fakeClock.Advance(new TimeSpan(0, 1, 0));
+            planet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == unit.Planet);
+            Assert.Equal(119, planet.ResourceQuantity[ResourceKind.Iron]);
+            await _fakeClock.Advance(new TimeSpan(0, 69, 0));
+            Assert.Equal(50, planet.ResourceQuantity[ResourceKind.Iron]);
+            await _fakeClock.Advance(new TimeSpan(0, 1, 0));
+            Assert.Equal(49, planet.ResourceQuantity[ResourceKind.Titanium]);
         }
     }
 }

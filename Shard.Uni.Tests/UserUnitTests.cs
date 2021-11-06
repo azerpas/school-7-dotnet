@@ -30,6 +30,14 @@ namespace Shard.Uni.Tests
             Assert.Equal(users,new List<User>());
         }
 
+        public User GetUser()
+        {
+            string uuid = Guid.NewGuid().ToString();
+            User user = new User(uuid, "azerpas");
+            _userService.Users.Add(user);
+            return user;
+        }
+
         [Fact]
         public void UserGenerated()
         {
