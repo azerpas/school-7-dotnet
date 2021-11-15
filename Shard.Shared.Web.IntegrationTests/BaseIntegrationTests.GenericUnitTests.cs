@@ -104,9 +104,10 @@ namespace Shard.Shared.Web.IntegrationTests
             return (await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
             {
                 id = unitId,
-                Type = unitType,
-                System = originSystem,
-                Planet = originPlanet
+                type = unitType,
+                system = originSystem,
+                planet = originPlanet,
+                resourcesQuantity = new { } // Some implementations might require this
             }), originSystem, originPlanet);
         }
 
