@@ -265,5 +265,261 @@ namespace Shard.Shared.Web.IntegrationTests
             await AssertResourceQuantity(client, userPath, "carbon", 0);
             await AssertResourceQuantity(client, userPath, "iron", 10);
         }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task QueuingCargoOnBuiltStarportCosts10Carbon10Iron5Gold()
+        {
+            using var client = factory.CreateClient();
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+
+            using var putResourceResponse = await PutResources(userPath, new
+            {
+                carbon = 10,
+                iron = 10,
+                gold = 5,
+            });
+
+            var response = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = "cargo"
+            });
+            await response.AssertSuccessStatusCode();
+            await AssertResourceQuantity(client, userPath, "carbon", 0);
+            await AssertResourceQuantity(client, userPath, "iron", 0);
+            await AssertResourceQuantity(client, userPath, "gold", 0);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CanLoadResourcesInCargo()
+        {
+            using var client = factory.CreateClient();
+            var (_, unitPath, _) = await CreateTransportAndLoadScenario(client);
+
+            var unit = await GetUnitOfPath(client, unitPath);
+
+            Assert.NotNull(unit["resourcesQuantity"]);
+            Assert.Equal(JTokenType.Object, unit["resourcesQuantity"].Type);
+            Assert.Equal(15, unit["resourcesQuantity"]["water"].Value<int>());
+            Assert.Equal(27, unit["resourcesQuantity"]["oxygen"].Value<int>());
+        }
+
+        private async Task<(string userPath, string unitPath, JObject unit)> CreateTransportAndLoadScenario(HttpClient client,
+            string unitType = "cargo", int waterLoaded = 15, bool shouldFail = false)
+        {
+            var (userPath, _, originalBuilding) = await BuildStarport(client);
+
+            await fakeClock.Advance(TimeSpan.FromMinutes(5));
+
+            using var putResourceResponse = await PutResources(userPath, new
+            {
+                carbon = 10,
+                iron = 10,
+                gold = 5,
+                water = 25,
+                oxygen = 30,
+                aluminium = 11
+            });
+            await putResourceResponse.AssertSuccessStatusCode();
+
+            var queuingRespponse = await client.PostAsJsonAsync($"{userPath}/buildings/{originalBuilding["id"].Value<string>()}/queue", new
+            {
+                type = unitType
+            });
+            await queuingRespponse.AssertSuccessStatusCode();
+
+            var unit = await queuingRespponse.Content.ReadAsAsync<JObject>();
+            string unitId = unit["id"].Value<string>();
+            var unitPath = userPath + "/units/" + unitId;
+
+            unit["resourcesQuantity"] = JObject.FromObject(new
+            {
+                water = waterLoaded,
+                oxygen = 27
+            });
+
+            var loadingResponse = await client.PutAsJsonAsync(unitPath, unit);
+            if (!shouldFail)
+                await loadingResponse.AssertSuccessStatusCode();
+            else
+                await loadingResponse.AssertStatusEquals(HttpStatusCode.BadRequest);
+
+            return (userPath, unitPath, unit);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task LoadingResourcesIntoCargoRemovesSaidResources()
+        {
+            using var client = factory.CreateClient();
+            var (userPath, _, _) = await CreateTransportAndLoadScenario(client);
+
+            await AssertResourceQuantity(client, userPath, "water", 10);
+            await AssertResourceQuantity(client, userPath, "oxygen", 3);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CannotLoadResourcesInBuilder()
+        {
+            using var client = factory.CreateClient();
+            await CreateTransportAndLoadScenario(client, 
+                unitType: "builder", shouldFail: true);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CanUnloadSomeResourcesFromCargo()
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitPath, originalUnit) = await CreateTransportAndLoadScenario(client);
+
+            originalUnit["resourcesQuantity"] = JObject.FromObject(new
+            {
+                water = 10,
+                oxygen = 17
+            });
+
+            var unloadingResponse = await client.PutAsJsonAsync(unitPath, originalUnit);
+
+            var unit = await GetUnitOfPath(client, unitPath);
+
+            Assert.NotNull(unit["resourcesQuantity"]);
+            Assert.Equal(JTokenType.Object, unit["resourcesQuantity"].Type);
+            Assert.Equal(10, unit["resourcesQuantity"]["water"].Value<int>());
+            Assert.Equal(17, unit["resourcesQuantity"]["oxygen"].Value<int>());
+            await AssertResourceQuantity(client, userPath, "water", 15);
+            await AssertResourceQuantity(client, userPath, "oxygen", 13);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CanLoadAndUnloadSomeResourcesFromCargoAtTheSameTime()
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitPath, originalUnit) = await CreateTransportAndLoadScenario(client);
+
+            originalUnit["resourcesQuantity"] = JObject.FromObject(new
+            {
+                water = 5,
+                oxygen = 20,
+                aluminium = 9
+            });
+
+            var unloadingResponse = await client.PutAsJsonAsync(unitPath, originalUnit);
+
+            var unit = await GetUnitOfPath(client, unitPath);
+
+            Assert.NotNull(unit["resourcesQuantity"]);
+            Assert.Equal(JTokenType.Object, unit["resourcesQuantity"].Type);
+            Assert.Equal(5, unit["resourcesQuantity"]["water"].Value<int>());
+            Assert.Equal(20, unit["resourcesQuantity"]["oxygen"].Value<int>());
+            Assert.Equal(9, unit["resourcesQuantity"]["aluminium"].Value<int>());
+            await AssertResourceQuantity(client, userPath, "water", 20);
+            await AssertResourceQuantity(client, userPath, "oxygen", 10);
+            await AssertResourceQuantity(client, userPath, "aluminium", 2);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CannotLoadMoreResourcesThanUserHas()
+        {
+            using var client = factory.CreateClient();
+            await CreateTransportAndLoadScenario(client,
+                waterLoaded: 26, shouldFail: true);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CannotLoadResourcesIfNoStarport()
+        {
+            await CannotLoadOrUnloadResourcesIfNoStarport(new
+            {
+                water = 16,
+                oxygen = 27
+            });
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CannotUnLoadResourcesIfNoStarport()
+        {
+            await CannotLoadOrUnloadResourcesIfNoStarport(new
+            {
+                water = 12,
+                oxygen = 27
+            });
+        }
+
+        private async Task CannotLoadOrUnloadResourcesIfNoStarport(object resourcesToAssign)
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitPath, unitBeforeMove) = await CreateTransportAndLoadScenario(client);
+
+            unitBeforeMove["destinationPlanet"] = null;
+            using var response = await client.PutAsJsonAsync(unitPath, unitBeforeMove);
+            await response.AssertSuccessStatusCode();
+            var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
+
+            unitAfterMove["resourcesQuantity"] = JObject.FromObject(resourcesToAssign);
+            var loadingResponse = await client.PutAsJsonAsync(unitPath, unitAfterMove);
+            await loadingResponse.AssertStatusEquals(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CanMoveUnitWithoutUnloadingResources()
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitPath, unitBeforeMove) = await CreateTransportAndLoadScenario(client);
+
+            unitBeforeMove["destinationPlanet"] = null;
+            using var response = await client.PutAsJsonAsync(unitPath, unitBeforeMove);
+            await response.AssertSuccessStatusCode();
+
+            var unit = await GetUnitOfPath(client, unitPath);
+
+            Assert.NotNull(unit["resourcesQuantity"]);
+            Assert.Equal(JTokenType.Object, unit["resourcesQuantity"].Type);
+            Assert.Equal(15, unit["resourcesQuantity"]["water"].Value<int>());
+            Assert.Equal(27, unit["resourcesQuantity"]["oxygen"].Value<int>());
+        }
+
+        [Fact]
+        [Trait("grading", "true")]
+        [Trait("version", "6")]
+        public async Task CanPutCargoWithoutChangingResourcesWithoutStarport()
+        {
+            using var client = factory.CreateClient();
+            var (userPath, unitPath, unitBeforeMove) = await CreateTransportAndLoadScenario(client);
+
+            unitBeforeMove["destinationPlanet"] = null;
+            using var response = await client.PutAsJsonAsync(unitPath, unitBeforeMove);
+            await response.AssertSuccessStatusCode();
+            var unitAfterMove = await response.Content.ReadAsAsync<JObject>();
+
+            var unloadingResponse = await client.PutAsJsonAsync(unitPath, unitAfterMove);
+
+            await unloadingResponse.AssertSuccessStatusCode();
+            var unit = await GetUnitOfPath(client, unitPath);
+
+            Assert.NotNull(unit["resourcesQuantity"]);
+            Assert.Equal(JTokenType.Object, unit["resourcesQuantity"].Type);
+            Assert.Equal(15, unit["resourcesQuantity"]["water"].Value<int>());
+            Assert.Equal(27, unit["resourcesQuantity"]["oxygen"].Value<int>());
+        }
     }
 }
