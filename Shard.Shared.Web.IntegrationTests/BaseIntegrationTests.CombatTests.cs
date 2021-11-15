@@ -404,8 +404,9 @@ namespace Shard.Shared.Web.IntegrationTests
             var response = await client.PutAsJsonAsync($"{userPath}/units/{unitId}", new
             {
                 id = unitId,
-                Type = unitType,
-                system
+                type = unitType,
+                system,
+                resourcesQuantity = new { } // Some implementations might require this
             });
 
             await response.AssertSuccessStatusCode();
