@@ -148,5 +148,46 @@ namespace Shard.Uni.Controllers
                 else return building;
             }
         }
+
+        // POST /users/{userId}/Buildings
+        [HttpPost("/users/{userId}/Buildings/{starportId}/queue")]
+        public ActionResult<Unit> AddToQueue(string userId, string starportId, [FromBody] QueueUnit addUnit)
+        {
+            User user = _userService.Users.Find(user => user.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            List<Building> buildings = _userService.Buildings[user.Id];
+            Building starport = buildings.Find(Building => Building.Id == starportId);
+
+            if (starport == null)
+            {
+                return NotFound("Starport not found");
+            }
+
+            if (starport.IsBuilt != true)
+            {
+                return BadRequest("Starport is not yet built");
+            }
+
+            try
+            {
+                starport.AddToQueue(addUnit, user);
+                Unit unit = new Unit(addUnit.Type, starport.System, starport.Planet);
+                _userService.Units[user.Id].Add(unit);
+                return unit;
+            }
+            catch (NotEnoughResources ex)
+            {
+                return BadRequest("Not enough resources");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
