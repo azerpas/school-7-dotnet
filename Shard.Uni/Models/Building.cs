@@ -32,7 +32,7 @@ namespace Shard.Uni.Models
             TokenSource = new CancellationTokenSource();
         }
 
-        public static List<string> GetBuildingTypes() => new List<string> { "mine" };
+        public static List<string> GetBuildingTypes() => new List<string> { "mine", "starport" };
 
         public static List<string> GetResourcesTypes() => new List<string> { "solid", "liquid", "gaz" };
 
@@ -49,29 +49,32 @@ namespace Shard.Uni.Models
             EstimatedBuildTime = null;
             BuilderId = null;
 
-            // Then every minute
-            //      - +1 resource to owner
-            //      - -1 resource from planet
-            clock.CreateTimer(
-                _ =>
-                {
-                    TokenSource.Token.ThrowIfCancellationRequested();
-                    ResourceKind resource = planet.GetResourceToMine(resourceCategory);
-                    try
+            if(Type == "mine")
+            {
+                // Then every minute
+                //      - +1 resource to owner
+                //      - -1 resource from planet
+                clock.CreateTimer(
+                    _ =>
                     {
-                        planet.Mine(resource);
-                    }
-                    catch (NoResourcesAvailableException)
-                    {
-                        Console.WriteLine($"[WARNING] No more resources are available for resource {resource.ToString()}");
-                        return;
-                    }
-                    user.ResourcesQuantity[resource] = user.ResourcesQuantity[resource] + 1;
-                },
-                null,
-                new TimeSpan(0, 1, 0), // starts the minute after building ...
-                new TimeSpan(0, 1, 0) // ... execute the code above every minute
-            );
+                        TokenSource.Token.ThrowIfCancellationRequested();
+                        ResourceKind resource = planet.GetResourceToMine(resourceCategory);
+                        try
+                        {
+                            planet.Mine(resource);
+                        }
+                        catch (NoResourcesAvailableException)
+                        {
+                            Console.WriteLine($"[WARNING] No more resources are available for resource {resource.ToString()}");
+                            return;
+                        }
+                        user.ResourcesQuantity[resource] = user.ResourcesQuantity[resource] + 1;
+                    },
+                    null,
+                    new TimeSpan(0, 1, 0), // starts the minute after building ...
+                    new TimeSpan(0, 1, 0) // ... execute the code above every minute
+                );
+            }
         }
 
     }

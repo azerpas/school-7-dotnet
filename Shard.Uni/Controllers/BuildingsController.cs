@@ -63,7 +63,7 @@ namespace Shard.Uni.Controllers
                 .Find(System => unit.System == System.Name).Planets
                 .Find(Planet => unit.Planet == Planet.Name);
 
-            Building building = new Building(createBuilding.Id, "mine", unit.System, unit.Planet, createBuilding.ResourceCategory, createBuilding.BuilderId, _clock);
+            Building building = new Building(createBuilding.Id, createBuilding.Type, unit.System, unit.Planet, createBuilding.ResourceCategory, createBuilding.BuilderId, _clock);
             _userService.Buildings[user.Id].Add(building);
 
             // Built in 5 minutes
