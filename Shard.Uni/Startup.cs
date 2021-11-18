@@ -13,6 +13,9 @@ using Microsoft.Extensions.Logging;
 using Shard.Shared.Core;
 using Shard.Uni.Services;
 using Microsoft.OpenApi.Models;
+using Shard.Uni.Middlewares;
+using Microsoft.AspNetCore.Authentication;
+using Shard.Uni.Handlers;
 
 namespace Shard.Uni
 {
@@ -28,12 +31,12 @@ namespace Shard.Uni
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddAuthentication("Basic").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", options => { });
             services.AddSingleton<MapGenerator>();
             services.Configure<MapGeneratorOptions>(options => options.Seed = "Uni");
             services.AddSingleton<SectorService>();
             services.AddSingleton<UserService>();
-            services.AddSingleton<SystemClock>();
+            services.AddSingleton<Shared.Core.SystemClock>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
