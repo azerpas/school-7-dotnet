@@ -31,7 +31,7 @@ namespace Shard.Uni.Models
         public bool HasEnoughResources(Dictionary<ResourceKind, int> resources)
         {
             return resources.All(
-                resource => resource.Value < ResourcesQuantity[resource.Key]
+                resource => resource.Value <= ResourcesQuantity[resource.Key]
             );
         }
 

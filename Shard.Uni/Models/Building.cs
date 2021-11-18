@@ -16,7 +16,7 @@ namespace Shard.Uni.Models
         public string? EstimatedBuildTime { get; set; }
         public string? BuilderId { get; set; }
         public string? ResourceCategory { get; set; }
-        public List<QueueUnit> Queue { get; set; }
+        public List<QueueUnit>? Queue { get; set; }
         public Task Construction { get; set; }
         public CancellationTokenSource TokenSource;
 
@@ -27,6 +27,7 @@ namespace Shard.Uni.Models
             System = system;
             Planet = planet;
             ResourceCategory = Type == "mine" ? resourceCategory : null;
+            Queue = Type == "starport" ? new List<QueueUnit>() : null;
             IsBuilt = false;
             BuilderId = builderId;
             EstimatedBuildTime = clock.Now.AddMinutes(5.0).ToString("yyyy-MM-ddTHH:mm:sssK");
