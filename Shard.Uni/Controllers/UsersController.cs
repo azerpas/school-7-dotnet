@@ -41,6 +41,8 @@ namespace Shard.Uni.Controllers
             {
                 return BadRequest();
             }
+
+            // Format validation
             string pattern = @"(([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})|(^[A-Za-z0-9]+$))";
             if (!Regex.IsMatch(userDto.Id, pattern, RegexOptions.Multiline))
             {
@@ -78,6 +80,8 @@ namespace Shard.Uni.Controllers
                     previousUser.DateOfCreation, 
                     previousUser.ResourcesQuantity
                 );
+
+                // If user is admin
                 if (HttpContext.User.IsInRole(Constants.Roles.Admin))
                 {
                     if(userDto.ResourcesQuantity != null)
@@ -87,12 +91,7 @@ namespace Shard.Uni.Controllers
                         _userService.Users.Add(user);
                     }
                 }
-                else
-                {
-                    // Sinon, ignoré ? TODO:
-                    // _userService.Users.Remove(usr);
-                    // _userService.Users.Add(user);
-                }
+                // else ignore (V5)
             }
 
             return new UserResourcesDetailDto(user);

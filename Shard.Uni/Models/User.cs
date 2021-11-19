@@ -36,6 +36,11 @@ namespace Shard.Uni.Models
             ResourcesQuantity = resources;
         }
 
+        /// <summary>
+        /// Check if the current user has enough resources
+        /// </summary>
+        /// <param name="resources"></param>
+        /// <returns></returns>
         public bool HasEnoughResources(Dictionary<ResourceKind, int> resources)
         {
             return resources.All(
@@ -43,6 +48,10 @@ namespace Shard.Uni.Models
             );
         }
 
+        /// <summary>
+        /// Remove the given resources quantities from the current user
+        /// </summary>
+        /// <param name="resources"></param>
         public void ConsumeResources(Dictionary<ResourceKind, int> resources)
         {
             foreach (KeyValuePair<ResourceKind, int> resource in resources)
@@ -51,6 +60,11 @@ namespace Shard.Uni.Models
             }
         }
 
+        /// <summary>
+        /// Replace current resources with given
+        /// Method used on Admin request
+        /// </summary>
+        /// <param name="resources"></param>
         public void ReplaceResources(Dictionary<string, int> resources)
         {
             foreach (KeyValuePair<string, int> resource in resources)
@@ -60,6 +74,9 @@ namespace Shard.Uni.Models
         }
     }
 
+    /// <summary>
+    /// A Data Transfer Object class used to fetch data from request Body
+    /// </summary>
     public class CreateUserDto
     {
         public string Id { get; }
@@ -74,6 +91,10 @@ namespace Shard.Uni.Models
         }
     }
 
+    /// <summary>
+    /// A class that mimics the User class with the only difference that the resources (resourcesQuantity)
+    /// will be returned with their Key values as lowercase 
+    /// </summary>
     public class UserResourcesDetailDto
     {
         public string Id { get; }
