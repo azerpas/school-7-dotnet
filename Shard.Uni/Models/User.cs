@@ -28,6 +28,14 @@ namespace Shard.Uni.Models
             };
         }
 
+        public User(string id, string pseudo, string dateOfCreation, Dictionary<ResourceKind, int> resources)
+        {
+            Id = id;
+            Pseudo = pseudo;
+            DateOfCreation = dateOfCreation;
+            ResourcesQuantity = resources;
+        }
+
         public bool HasEnoughResources(Dictionary<ResourceKind, int> resources)
         {
             return resources.All(

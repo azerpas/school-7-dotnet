@@ -35,7 +35,7 @@ namespace Shard.Uni.Controllers
 
         // PUT /Users/{id}
         [HttpPut("{id}")]
-        public ActionResult<User> Put(string id, CreateUserDto userDto)
+        public ActionResult<UserResourcesDetailDto> Put(string id, CreateUserDto userDto)
         {
             if (id != userDto.Id)
             {
@@ -47,10 +47,11 @@ namespace Shard.Uni.Controllers
                 return BadRequest("User Id is incorrect");
             }
 
-            User usr = _userService.Users.Find(User => id == User.Id);
-            User user = new User(userDto.Id, userDto.Pseudo);
-            if (usr == null) // Adding action
+            User previousUser = _userService.Users.Find(User => id == User.Id);
+            User user;
+            if (previousUser == null) // Adding action
             {
+                user = new User(userDto.Id, userDto.Pseudo);
                 // Save User
                 _userService.Users.Add(user);
 
@@ -70,12 +71,19 @@ namespace Shard.Uni.Controllers
             }
             else // Replacement action
             {
+                // Use previous user to construct new one (creates a copy without ICloneable)
+                user = new User(
+                    userDto.Id != null ? userDto.Id : previousUser.Id, 
+                    userDto.Pseudo != null ? userDto.Pseudo : previousUser.Pseudo, 
+                    previousUser.DateOfCreation, 
+                    previousUser.ResourcesQuantity
+                );
                 if (HttpContext.User.IsInRole(Constants.Roles.Admin))
                 {
                     if(userDto.ResourcesQuantity != null)
                     {
                         user.ReplaceResources(userDto.ResourcesQuantity);
-                        _userService.Users.Remove(usr);
+                        _userService.Users.Remove(previousUser);
                         _userService.Users.Add(user);
                     }
                 }
@@ -87,7 +95,7 @@ namespace Shard.Uni.Controllers
                 }
             }
 
-            return user;
+            return new UserResourcesDetailDto(user);
         }
     }
 }
