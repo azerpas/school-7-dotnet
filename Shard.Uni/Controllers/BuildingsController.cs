@@ -173,6 +173,11 @@ namespace Shard.Uni.Controllers
                 return BadRequest("Starport is not yet built");
             }
 
+            if(starport.Type != "starport")
+            {
+                return BadRequest("Wrong building type");
+            }
+
             try
             {
                 starport.AddToQueue(addUnit, user);
