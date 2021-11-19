@@ -42,17 +42,27 @@ namespace Shard.Uni.Models
                 ResourcesQuantity[resource.Key] = ResourcesQuantity[resource.Key] - resource.Value;
             }
         }
+
+        public void ReplaceResources(Dictionary<string, int> resources)
+        {
+            foreach (KeyValuePair<string, int> resource in resources)
+            {
+                ResourcesQuantity[(ResourceKind)Enum.Parse(typeof(ResourceKind), resource.Key)] = resource.Value;
+            }
+        }
     }
 
     public class CreateUserDto
     {
         public string Id { get; }
         public string Pseudo { get; }
+        public Dictionary<string, int>? ResourcesQuantity { get; }
 
-        public CreateUserDto(string id, string pseudo)
+        public CreateUserDto(string id, string pseudo, Dictionary<string, int>? resourcesQuantity)
         {
             Id = id;
             Pseudo = pseudo;
+            ResourcesQuantity = resourcesQuantity;
         }
     }
 

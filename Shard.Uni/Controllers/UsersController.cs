@@ -70,8 +70,21 @@ namespace Shard.Uni.Controllers
             }
             else // Replacement action
             {
-                _userService.Users.Remove(usr);
-                _userService.Users.Add(user);
+                if (HttpContext.User.IsInRole(Constants.Roles.Admin))
+                {
+                    if(userDto.ResourcesQuantity != null)
+                    {
+                        user.ReplaceResources(userDto.ResourcesQuantity);
+                        _userService.Users.Remove(usr);
+                        _userService.Users.Add(user);
+                    }
+                }
+                else
+                {
+                    // Sinon, ignoré ? TODO:
+                    // _userService.Users.Remove(usr);
+                    // _userService.Users.Add(user);
+                }
             }
 
             return user;
