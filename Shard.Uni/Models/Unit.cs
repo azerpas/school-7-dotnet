@@ -20,6 +20,7 @@ namespace Shard.Uni.Models
         public string DestinationPlanet { get; set; }
         public string DestinationSystem { get; set; }
         public string EstimatedTimeOfArrival { get; set; }
+        public int Health { get; set; }
 
         public Unit(string type, string system, string? planet)
         {
@@ -29,6 +30,19 @@ namespace Shard.Uni.Models
             Planet = planet;
             DestinationSystem = system;
             DestinationPlanet = planet;
+            // TODO: replace by heritage
+            switch (Type)
+            {
+                case "fighter":
+                    Health = 80;
+                    break;
+                case "bomber":
+                    Health = 100;
+                    break;
+                default:
+                    Health = 150; // TODO: to verify
+                    break;
+            }
         }
 
         [JsonConstructorAttribute]
@@ -42,7 +56,7 @@ namespace Shard.Uni.Models
 
         public static List<string> getAuthorizedTypes()
         {
-            return new List<string> { "scout", "builder" };
+            return new List<string> { "bomber", "fighter", "cruiser", "scout", "builder" };
         }
 
 #nullable enable
