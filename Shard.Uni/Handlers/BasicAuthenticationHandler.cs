@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -25,6 +26,11 @@ namespace Shard.Uni.Handlers
             string header = this.Context.Request.Headers["Authorization"];
             if(header != null)
             {
+                // Header cleaning, trying to parse this format "Basic BASE64_STRING"
+                header = header.Trim();
+                header = header.Split(' ').Last();
+
+                // Decode Base64 string
                 string auth = Encoding.UTF8.GetString(Convert.FromBase64String(header));
                 if(auth != null)
                 {
