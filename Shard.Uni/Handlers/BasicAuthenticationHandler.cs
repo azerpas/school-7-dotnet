@@ -41,7 +41,7 @@ namespace Shard.Uni.Handlers
                                         new ClaimsIdentity(
                                             new List<Claim>
                                             {
-                                                new Claim(ClaimTypes.Role, "Administrator")
+                                                new Claim(ClaimTypes.Role, Constants.Roles.Admin)
                                             }
                                         )
                                     }
