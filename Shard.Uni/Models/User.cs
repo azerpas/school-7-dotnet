@@ -69,7 +69,8 @@ namespace Shard.Uni.Models
         {
             foreach (KeyValuePair<string, int> resource in resources)
             {
-                ResourcesQuantity[(ResourceKind)Enum.Parse(typeof(ResourceKind), resource.Key)] = resource.Value;
+                ResourceKind kind = (ResourceKind)Enum.Parse(typeof(ResourceKind), Utils.Strings.Capitalize(resource.Key));
+                ResourcesQuantity[kind] = resource.Value;
             }
         }
     }
