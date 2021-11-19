@@ -59,6 +59,11 @@ namespace Shard.Uni.Models
             return new List<string> { "bomber", "fighter", "cruiser", "scout", "builder" };
         }
 
+        public static List<string> GetFighterTypes()
+        {
+            return new List<string> { "bomber", "fighter", "cruiser" };
+        }
+
 #nullable enable
         public void MoveTo(string system, string? planet, IClock clock)
         {

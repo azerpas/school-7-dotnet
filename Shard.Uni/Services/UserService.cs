@@ -1,5 +1,6 @@
 ﻿using Shard.Uni.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Shard.Uni.Services
 {
@@ -14,6 +15,32 @@ namespace Shard.Uni.Services
             Users = new List<User>();
             Units = new Dictionary<string, List<Unit>>();
             Buildings = new Dictionary<string, List<Building>>();
+        }
+
+        public List<Unit> GetAllUnits()
+        {
+            return Units
+                .Select((KeyValuePair<string, List<Unit>> keyValue) => keyValue.Value)
+                .SelectMany(Units => Units)
+                .ToList();
+        }
+
+        public List<Unit> GetFighterUnits()
+        {
+            return GetAllUnits()
+                .FindAll(unit => Unit.GetFighterTypes().Contains(unit.Type));
+        }
+
+        public List<Unit> GetUnitsOnPlanet(string planet)
+        {
+            return GetAllUnits()
+                .FindAll(Unit => Unit.Planet == planet);
+        }
+
+        public List<Unit> GetUnitsInSystem(string system)
+        {
+            return GetAllUnits()
+                .FindAll(Unit => Unit.System == system);
         }
     }
 }
