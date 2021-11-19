@@ -93,19 +93,34 @@ namespace Shard.Uni.Controllers
             StarSystem destinationSystem = _sectorService.Systems.Find(StarSystem => StarSystem.Name == spaceship.DestinationSystem);
             Planet destinationPlanet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == spaceship.DestinationPlanet);
 
-            if (destinationSystem == null)
-            {
-                return NotFound("Destination System not found");
-            }
-
             Unit unt = units.Find(Unit => Unit.Id == unitId);
 
+            // Unit does not exists
             if (unt == null)
             {
-                _userService.Units[userId].Add(spaceship);
+                // Admin
+                if (HttpContext.User.IsInRole(Constants.Roles.Admin))
+                {
+                    _userService.Units[userId].Add(spaceship);
+                } 
+                // User
+                else if (HttpContext.User.IsInRole(Constants.Roles.User))
+                {
+                    return Forbid();
+                }
+                // Unauthenticated
+                else
+                {
+                    return Unauthorized();
+                }
             }
             else
             {
+                if (destinationSystem == null)
+                {
+                    return NotFound("Destination System not found");
+                }
+
                 Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
                 _userService.Units[userId].Remove(oldUnit);
                 _userService.Units[userId].Add(spaceship);

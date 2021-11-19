@@ -24,6 +24,8 @@ namespace Shard.Uni.Handlers
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             string header = this.Context.Request.Headers["Authorization"];
+
+            // Probably an admin
             if(header != null)
             {
                 // Header cleaning, trying to parse this format "Basic BASE64_STRING"
@@ -58,6 +60,9 @@ namespace Shard.Uni.Handlers
                     }
                 }
             }
+            // TODO: return new Ticket with ClaimTypes.Role : Constants.Roles.User
+
+            // Unauthenticated
             return Task.Run(() => AuthenticateResult.Success(
                 new AuthenticationTicket(
                     new ClaimsPrincipal(), "Basic"   
