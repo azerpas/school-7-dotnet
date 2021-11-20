@@ -36,10 +36,11 @@ namespace Shard.Uni
             services.AddSingleton<SectorService>();
             services.AddSingleton<UserService>();
             services.AddSingleton<Shared.Core.SystemClock>();
+            services.AddHostedService<UnitsHostedService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Shard.Uni", Version = "v1" });
+                c.SwaggerDoc("v5", new OpenApiInfo { Title = "Shard.Uni", Version = "v5" });
             });
         }
 
