@@ -78,7 +78,7 @@ namespace Shard.Uni.Services
                     }
                     else if(unit.Type == "cruiser" && currentSecond % 6 == 0)
                     {
-                        damage = 6;
+                        damage = 40;
                     }
                     else
                     {
@@ -96,6 +96,9 @@ namespace Shard.Uni.Services
                         targets = _userService.GetUnitsInSystem(unit.System);
                     }
                     Unit target = GetTarget(unit.Type, unit.Id, targets);
+
+                    // Protection(s)
+                    if (target.Type == "bomber" && unit.Type == "cruiser") damage = damage / 10;
 
                     // Inflict damages
                     target.Health -= damage;
@@ -116,7 +119,7 @@ namespace Shard.Uni.Services
                         _userService.Units[keyValue.Key].Remove(unit);
                     }
                 }
-                await _clock.Delay(new TimeSpan(0, 0, 1));
+                await _clock.Delay(100);
             }
         }
 

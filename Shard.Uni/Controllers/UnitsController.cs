@@ -39,12 +39,19 @@ namespace Shard.Uni.Controllers
         {
             List<Unit> units = _userService.Units[userId];
             Unit unit = units.Find(Unit => Unit.Id == unitId);
+
             if(unit == null)
             {
                 return NotFound();
             }
             else
             {
+                if (unit.Health <= 0)
+                {
+                    _userService.Units[userId].Remove(unit);
+                    return NotFound();
+                }
+
                 if (unit.EstimatedTimeOfArrival != null)
                 {
                     DateTime arrival = DateTime.Parse(unit.EstimatedTimeOfArrival);
