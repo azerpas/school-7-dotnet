@@ -95,7 +95,7 @@ namespace Shard.Uni.Services
                     {
                         targets = _userService.GetUnitsInSystem(unit.System);
                     }
-                    Unit target = GetTarget(unit.Type, targets);
+                    Unit target = GetTarget(unit.Type, unit.Id, targets);
 
                     // Inflict damages
                     target.Health -= damage;
@@ -120,35 +120,35 @@ namespace Shard.Uni.Services
             }
         }
 
-        public Unit GetTarget(string unitType, List<Unit> units)
+        public Unit GetTarget(string unitType, string unitId, List<Unit> units)
         {
             Unit unit;
             switch (unitType)
             {
                 case "fighter":
-                    unit = units.Find(u => u.Type == "bomber");
+                    unit = units.Find(u => u.Type == "bomber" && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "fighter");
+                    unit = units.Find(u => u.Type == "fighter" && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "cruiser");
+                    unit = units.Find(u => u.Type == "cruiser" && u.Id != unitId);
                     if (unit != null) return unit;
                     break;
 
                 case "bomber":
-                    unit = units.Find(u => u.Type == "cruiser");
+                    unit = units.Find(u => u.Type == "cruiser" && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "bomber");
+                    unit = units.Find(u => u.Type == "bomber" && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "fighter");
+                    unit = units.Find(u => u.Type == "fighter" && u.Id != unitId);
                     if (unit != null) return unit;
                     break;
 
                 case "cruiser":
-                    unit = units.Find(u => u.Type == "fighter");
+                    unit = units.Find(u => u.Type == "fighter" && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "cruiser");
+                    unit = units.Find(u => u.Type == "cruiser" && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "bomber");
+                    unit = units.Find(u => u.Type == "bomber" && u.Id != unitId);
                     if (unit != null) return unit;
                     break;
                 default:

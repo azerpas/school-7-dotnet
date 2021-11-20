@@ -41,6 +41,8 @@ namespace Shard.Uni.Models
             Type = type;
             System = system;
             Planet = planet;
+            DestinationSystem = system;
+            DestinationPlanet = planet;
             Health = GetHealth();
         }
 
@@ -51,7 +53,9 @@ namespace Shard.Uni.Models
                 case "fighter":
                     return 80;
                 case "bomber":
-                    return 100;
+                    return 50;
+                case "cruiser":
+                    return 400;
                 default:
                     return 150; // TODO: to verify
             }
