@@ -98,12 +98,11 @@ namespace Shard.Uni.Controllers
             // Unit does not exists
             if (unt == null)
             {
-                spaceship.DestinationSystem = spaceship.System;
-                spaceship.DestinationPlanet = spaceship.Planet;
+                Unit unit = new Unit(spaceship.Id, spaceship.Type, spaceship.System, spaceship.Planet);
                 // Admin
                 if (HttpContext.User.IsInRole(Constants.Roles.Admin))
                 {
-                    _userService.Units[userId].Add(spaceship);
+                    _userService.Units[userId].Add(unit);
                 } 
                 // User
                 else if (HttpContext.User.IsInRole(Constants.Roles.User))

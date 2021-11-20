@@ -31,18 +31,7 @@ namespace Shard.Uni.Models
             DestinationSystem = system;
             DestinationPlanet = planet;
             // TODO: replace by heritage
-            switch (Type)
-            {
-                case "fighter":
-                    Health = 80;
-                    break;
-                case "bomber":
-                    Health = 100;
-                    break;
-                default:
-                    Health = 150; // TODO: to verify
-                    break;
-            }
+            Health = GetHealth();
         }
 
         [JsonConstructorAttribute]
@@ -52,6 +41,20 @@ namespace Shard.Uni.Models
             Type = type;
             System = system;
             Planet = planet;
+            Health = GetHealth();
+        }
+
+        public int GetHealth()
+        {
+            switch (Type)
+            {
+                case "fighter":
+                    return 80;
+                case "bomber":
+                    return 100;
+                default:
+                    return 150; // TODO: to verify
+            }
         }
 
         public static List<string> getAuthorizedTypes()

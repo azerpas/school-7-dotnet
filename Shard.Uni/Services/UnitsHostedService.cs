@@ -46,8 +46,14 @@ namespace Shard.Uni.Services
 
         public void Dispose()
         {
-            FightTask.Dispose();
-            ClearTask.Dispose();
+            if(FightTask.IsCompleted || FightTask.IsFaulted || FightTask.IsCanceled)
+            {
+                FightTask.Dispose();
+            }
+            if (ClearTask.IsCompleted || ClearTask.IsFaulted || ClearTask.IsCanceled)
+            {
+                ClearTask.Dispose();
+            }
         }
 
         public async Task InflictDamages()
