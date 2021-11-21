@@ -63,22 +63,14 @@ namespace Shard.Uni.Services
                 List<Unit> units = _userService.GetFighterUnits();
                 List<Unit> targets;
                 long currentSecond = new DateTimeOffset(_clock.Now).ToUnixTimeSeconds();
-                foreach (Unit unit in units)
+                foreach (FightingUnit unit in units)
                 {
                     int damage;
 
                     // Time requirement & define damage inflicted
-                    if(unit.Type == "fighter" && currentSecond % 6 == 0)
+                    if (currentSecond % 6 == 0 || currentSecond % 60 == 0 || currentSecond % 6 == 0)
                     {
-                        damage = 10;
-                    }
-                    else if(unit.Type == "bomber" && currentSecond % 60 == 0)
-                    {
-                        damage = 1000;
-                    }
-                    else if(unit.Type == "cruiser" && currentSecond % 6 == 0)
-                    {
-                        damage = 40;
+                        damage = unit.Damage;
                     }
                     else
                     {
@@ -95,13 +87,13 @@ namespace Shard.Uni.Services
                     {
                         targets = _userService.GetUnitsInSystem(unit.System);
                     }
-                    Unit target = GetTarget(unit.Type, unit.Id, targets);
+                    Unit target = GetTarget(unit.GetType(), unit.Id, targets);
 
                     // Protection(s)
-                    if (target.Type == "bomber" && unit.Type == "cruiser") damage = damage / 10;
+                    if (target.GetType() == typeof(Bomber) && unit.GetType() == typeof(Cruiser)) damage = damage / 10;
 
                     // Inflict damages
-                    target.Health -= damage;
+                    (target as FightingUnit).Health -= damage;
                 }
                 await _clock.Delay(new TimeSpan(0, 0, 1));
             }
@@ -113,7 +105,7 @@ namespace Shard.Uni.Services
             {
                 foreach (KeyValuePair<string, List<Unit>> keyValue in _userService.Units)
                 {
-                    List<Unit> unitsToRemove = keyValue.Value.FindAll(Unit => Unit.Health <= 0);
+                    List<Unit> unitsToRemove = keyValue.Value.FindAll(Unit => (Unit as FightingUnit).Health <= 0);
                     foreach(Unit unit in unitsToRemove)
                     {
                         _userService.Units[keyValue.Key].Remove(unit);
@@ -123,35 +115,35 @@ namespace Shard.Uni.Services
             }
         }
 
-        public Unit GetTarget(string unitType, string unitId, List<Unit> units)
+        public Unit GetTarget(Type unitType, string unitId, List<Unit> units)
         {
             Unit unit;
-            switch (unitType)
+            switch (unitType.ToString())
             {
-                case "fighter":
-                    unit = units.Find(u => u.Type == "bomber" && u.Id != unitId);
+                case "Fighter":
+                    unit = units.Find(u => u.GetType() == typeof(Bomber) && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "fighter" && u.Id != unitId);
+                    unit = units.Find(u => u.GetType() == typeof(Fighter) && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "cruiser" && u.Id != unitId);
-                    if (unit != null) return unit;
-                    break;
-
-                case "bomber":
-                    unit = units.Find(u => u.Type == "cruiser" && u.Id != unitId);
-                    if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "bomber" && u.Id != unitId);
-                    if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "fighter" && u.Id != unitId);
+                    unit = units.Find(u => u.GetType() == typeof(Cruiser) && u.Id != unitId);
                     if (unit != null) return unit;
                     break;
 
-                case "cruiser":
-                    unit = units.Find(u => u.Type == "fighter" && u.Id != unitId);
+                case "Bomber":
+                    unit = units.Find(u => u.GetType() == typeof(Cruiser) && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "cruiser" && u.Id != unitId);
+                    unit = units.Find(u => u.GetType() == typeof(Bomber) && u.Id != unitId);
                     if (unit != null) return unit;
-                    unit = units.Find(u => u.Type == "bomber" && u.Id != unitId);
+                    unit = units.Find(u => u.GetType() == typeof(Fighter) && u.Id != unitId);
+                    if (unit != null) return unit;
+                    break;
+
+                case "Cruiser":
+                    unit = units.Find(u => u.GetType() == typeof(Fighter) && u.Id != unitId);
+                    if (unit != null) return unit;
+                    unit = units.Find(u => u.GetType() == typeof(Cruiser) && u.Id != unitId);
+                    if (unit != null) return unit;
+                    unit = units.Find(u => u.GetType() == typeof(Bomber) && u.Id != unitId);
                     if (unit != null) return unit;
                     break;
                 default:

@@ -159,6 +159,25 @@ namespace Shard.Uni.Models
         {
             Type = type;
         }
+
+        public Unit ToClass(string system, string planet)
+        {
+            switch (Type)
+            {
+                case "builder":
+                    return new Builder(system, planet);
+                case "scout":
+                    return new Scout(system, planet);
+                case "bomber":
+                    return new Bomber(system, planet);
+                case "fighter":
+                    return new Fighter(system, planet);
+                case "cruiser":
+                    return new Cruiser(system, planet);
+                default:
+                    throw new UnrecognizedUnit("Unrecognized type of Unit");
+            }
+        }
     }
 
     public class NotEnoughResources : Exception

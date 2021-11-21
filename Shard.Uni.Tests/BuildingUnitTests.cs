@@ -33,7 +33,27 @@ namespace Shard.Uni.Tests
             StarSystem system = _sectorService.Systems[index];
             index = random.Next(system.Planets.Count);
             Planet planet = system.Planets[index];
-            return new Unit(type, system.Name, planet.Name);
+            return UnitFromType(type, system.Name, planet.Name);
+        }
+
+        public Unit UnitFromType(string type, string system, string? planet)
+        {
+            string id = Guid.NewGuid().ToString();
+            switch (type)
+            {
+                case "builder":
+                    return new Builder(id, system, planet);
+                case "scout":
+                    return new Scout(id, system, planet);
+                case "bomber":
+                    return new Bomber(id, system, planet);
+                case "fighter":
+                    return new Fighter(id, system, planet);
+                case "cruiser":
+                    return new Cruiser(id, system, planet);
+                default:
+                    throw new UnrecognizedUnit("Unrecognized type of Unit");
+            }
         }
 
         [Fact]

@@ -28,7 +28,7 @@ namespace Shard.Uni.Services
         public List<Unit> GetFighterUnits()
         {
             return GetAllUnits()
-                .FindAll(unit => Unit.GetFighterTypes().Contains(unit.Type));
+                .FindAll(unit => unit.GetType().IsSubclassOf(typeof(FightingUnit)));
         }
 
         public List<Unit> GetUnitsOnPlanet(string planet)

@@ -46,10 +46,14 @@ namespace Shard.Uni.Controllers
             }
             else
             {
-                if (unit.Health <= 0)
+                if(unit.GetType().IsSubclassOf(typeof(FightingUnit)))
                 {
-                    _userService.Units[userId].Remove(unit);
-                    return NotFound();
+                    FightingUnit fightingUnit = unit as FightingUnit;
+                    if (fightingUnit.Health <= 0)
+                    {
+                        _userService.Units[userId].Remove(unit);
+                        return NotFound();
+                    }
                 }
 
                 if (unit.EstimatedTimeOfArrival != null)
@@ -83,18 +87,13 @@ namespace Shard.Uni.Controllers
 
         // PUT /Users/{userId}/Units/{unitId}
         [HttpPut("{userId}/Units/{unitId}")]
-        public ActionResult<Unit> Put(string userId, string unitId, Unit spaceship)
+        public ActionResult<Unit> Put(string userId, string unitId, CreateUnitDto spaceship)
         {
             List<Unit> units = _userService.Units[userId];
 
             if (unitId != spaceship.Id)
             {
                 return BadRequest();
-            }
-
-            if (!Unit.getAuthorizedTypes().Contains(spaceship.Type))
-            {
-                return BadRequest("Unrecognized type of Unit");
             }
 
             StarSystem destinationSystem = _sectorService.Systems.Find(StarSystem => StarSystem.Name == spaceship.DestinationSystem);
@@ -105,7 +104,8 @@ namespace Shard.Uni.Controllers
             // Unit does not exists
             if (unt == null)
             {
-                Unit unit = new Unit(spaceship.Id, spaceship.Type, spaceship.System, spaceship.Planet);
+                Unit unit = spaceship.ToUnit();
+
                 // Admin
                 if (HttpContext.User.IsInRole(Constants.Roles.Admin))
                 {
@@ -121,6 +121,8 @@ namespace Shard.Uni.Controllers
                 {
                     return Unauthorized();
                 }
+
+                return unit;
             }
             else
             {
@@ -130,11 +132,12 @@ namespace Shard.Uni.Controllers
                 }
 
                 Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                Unit newUnit = spaceship.ToUnit();
                 _userService.Units[userId].Remove(oldUnit);
-                _userService.Units[userId].Add(spaceship);
+                _userService.Units[userId].Add(newUnit);
                 
                 bool sameSystem = spaceship.DestinationSystem == spaceship.System;
-                spaceship.MoveTo(system: destinationSystem.Name, planet: destinationPlanet?.Name, _clock);
+                newUnit.MoveTo(system: destinationSystem.Name, planet: destinationPlanet?.Name, _clock);
 
                 if(!sameSystem || destinationPlanet?.Name != spaceship.Planet)
                 {
@@ -150,8 +153,8 @@ namespace Shard.Uni.Controllers
                         _userService.Buildings[userId].RemoveAll(Building => Building.Id == building.Id);
                     }
                 }
+                return newUnit;
             }
-            return spaceship;
         }
 
         // GET /Users/{userId}/Units/{unitId}/location
@@ -172,7 +175,7 @@ namespace Shard.Uni.Controllers
                 // Setting the Key to lower because of the test verification :
                 // https://gitlab.com/efrei-p2023/efrei-p2023-csharp/-/blob/v2/Shard.Shared.Web.IntegrationTests/BaseIntegrationTests.ScoutTests.cs#L225-235
                 UnitLocationDetailDto unitLocation = new UnitLocationDetailDto(unit.System, planet);
-                if(unit.Type == "builder")
+                if(unit.GetType() == typeof(Builder))
                 {
                     unitLocation.resourcesQuantity = null;
                 }

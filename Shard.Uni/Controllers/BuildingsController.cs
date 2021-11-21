@@ -55,7 +55,7 @@ namespace Shard.Uni.Controllers
             // Should be 404
             if (unit == null) return BadRequest("Unit not found");
 
-            if (unit.Type != "builder") return BadRequest("Unit is not a builder");
+            if (unit.GetType() != typeof(Builder)) return BadRequest("Unit is not a builder");
 
             if (unit.Planet == null) return BadRequest("Unit is not over a planet");
 
@@ -181,7 +181,7 @@ namespace Shard.Uni.Controllers
             try
             {
                 starport.AddToQueue(addUnit, user);
-                Unit unit = new Unit(addUnit.Type, starport.System, starport.Planet);
+                Unit unit = addUnit.ToClass(starport.System, starport.Planet);
                 _userService.Units[user.Id].Add(unit);
                 return unit;
             }
