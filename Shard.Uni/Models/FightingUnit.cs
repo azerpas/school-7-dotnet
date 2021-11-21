@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace Shard.Uni.Models
 {
     public abstract class FightingUnit : Unit
@@ -19,6 +21,8 @@ namespace Shard.Uni.Models
             Health = health;
             Damage = damage;
         }
+
+        public static List<Type> GetFightingTypes => new List<Type> { typeof(Bomber), typeof(Fighter), typeof(Cruiser) };
     }
 }
 

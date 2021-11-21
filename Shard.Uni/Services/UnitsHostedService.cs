@@ -105,7 +105,9 @@ namespace Shard.Uni.Services
             {
                 foreach (KeyValuePair<string, List<Unit>> keyValue in _userService.Units)
                 {
-                    List<Unit> unitsToRemove = keyValue.Value.FindAll(Unit => (Unit as FightingUnit).Health <= 0);
+                    List<Unit> unitsToRemove = keyValue.Value
+                        .FindAll(unit => FightingUnit.GetFightingTypes.Contains(unit.GetType()))
+                        .FindAll(Unit => (Unit as FightingUnit).Health <= 0);
                     foreach(Unit unit in unitsToRemove)
                     {
                         _userService.Units[keyValue.Key].Remove(unit);

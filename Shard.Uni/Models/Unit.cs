@@ -25,7 +25,7 @@ namespace Shard.Uni.Models
         public Unit(string type, string system, string? planet)
         {
             Id = Guid.NewGuid().ToString();
-            Type = Type;
+            Type = type;
             System = system;
             Planet = planet;
             DestinationSystem = system;
@@ -33,9 +33,10 @@ namespace Shard.Uni.Models
         }
 
         [JsonConstructorAttribute]
-        public Unit(string type, string id, string system, string? planet)
+        public Unit(string id, string type, string system, string? planet)
         {
             Id = id;
+            Type = type;
             System = system;
             Planet = planet;
             DestinationSystem = system;
