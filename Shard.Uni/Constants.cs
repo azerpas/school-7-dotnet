@@ -25,6 +25,13 @@ namespace Shard.Uni
                 public const int Cruiser = 40;
                 public const int Fighter = 10;
             }
+
+            public static class Timeout
+            {
+                public const int Bomber = 60;
+                public const int Cruiser = 6;
+                public const int Fighter = 6;
+            }
         }
     }
 }

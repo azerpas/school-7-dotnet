@@ -68,7 +68,7 @@ namespace Shard.Uni.Services
                     int damage;
 
                     // Time requirement & define damage inflicted
-                    if (currentSecond % 6 == 0 || currentSecond % 60 == 0 || currentSecond % 6 == 0)
+                    if (currentSecond % unit.Timeout == 0)
                     {
                         damage = unit.Damage;
                     }
@@ -120,7 +120,7 @@ namespace Shard.Uni.Services
         public Unit GetTarget(Type unitType, string unitId, List<Unit> units)
         {
             Unit unit;
-            switch (unitType.ToString())
+            switch (unitType.Name.ToString())
             {
                 case "Fighter":
                     unit = units.Find(u => u.GetType() == typeof(Bomber) && u.Id != unitId);
