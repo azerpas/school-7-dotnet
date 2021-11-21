@@ -83,7 +83,7 @@ namespace Shard.Uni.Controllers
             {
                 return NotFound("User not found");
             }
-
+            // TODO: missing resourceCategory and queue for mine and starport
             return _userService.Buildings[user.Id];
         }
 
