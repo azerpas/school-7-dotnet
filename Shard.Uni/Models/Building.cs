@@ -6,7 +6,7 @@ using Shard.Shared.Core;
 
 namespace Shard.Uni.Models
 {
-    public class Building
+    public abstract class Building
     {
         public string Id { get; set; }
         public string Type { get; set; }
@@ -15,19 +15,15 @@ namespace Shard.Uni.Models
         public bool? IsBuilt { get; set; }
         public string? EstimatedBuildTime { get; set; }
         public string? BuilderId { get; set; }
-        public string? ResourceCategory { get; set; }
-        public List<QueueUnit>? Queue { get; set; }
         public Task Construction { get; set; }
         public CancellationTokenSource TokenSource;
 
-        public Building(string id, string type, string system, string planet, string resourceCategory, string builderId, IClock clock)
+        public Building(string id, string type, string system, string planet, string builderId, IClock clock)
         {
             Id = id;
             Type = type;
             System = system;
             Planet = planet;
-            ResourceCategory = Type == "mine" ? resourceCategory : null;
-            Queue = Type == "starport" ? new List<QueueUnit>() : null;
             IsBuilt = false;
             BuilderId = builderId;
             EstimatedBuildTime = clock.Now.AddMinutes(5.0).ToString("yyyy-MM-ddTHH:mm:sssK");
@@ -38,38 +34,38 @@ namespace Shard.Uni.Models
 
         public static List<string> GetResourcesTypes() => new List<string> { "solid", "liquid", "gaz" };
 
-        public static Dictionary<string, Dictionary<ResourceKind, int>> GetStarportCosts() => new Dictionary<string, Dictionary<ResourceKind, int>>
+        public static Dictionary<Type, Dictionary<ResourceKind, int>> GetStarportCosts() => new Dictionary<Type, Dictionary<ResourceKind, int>>
         {
             {
-                "scout",
+                typeof(Scout),
                 new Dictionary<ResourceKind, int> {
                     { ResourceKind.Carbon, 5 },
                     { ResourceKind.Iron, 5 }
                 }
             },
             {
-                "builder",
+                typeof(Builder),
                 new Dictionary<ResourceKind, int> {
                     { ResourceKind.Carbon, 5 },
                     { ResourceKind.Iron, 10 }
                 }
             },
             {
-                "fighter",
+                typeof(Fighter),
                 new Dictionary<ResourceKind, int> {
                     { ResourceKind.Iron, 20 },
                     { ResourceKind.Aluminium, 10 }
                 }
             },
             {
-                "bomber",
+                typeof(Bomber),
                 new Dictionary<ResourceKind, int> {
                     { ResourceKind.Iron, 30 },
                     { ResourceKind.Titanium, 10 }
                 }
             },
             {
-                "cruiser",
+                typeof(Cruiser),
                 new Dictionary<ResourceKind, int> {
                     { ResourceKind.Iron, 60 },
                     { ResourceKind.Gold, 20 }
@@ -117,22 +113,6 @@ namespace Shard.Uni.Models
                 );
             }
         }
-
-        public async void AddToQueue(QueueUnit unit, User user)
-        {
-            Dictionary<ResourceKind, int> resourcesToConsume = GetStarportCosts()[unit.Type];
-            if (user.HasEnoughResources(resourcesToConsume))
-            {
-                Queue.Add(unit);
-                user.ConsumeResources(resourcesToConsume);
-            }
-            else
-            {
-                throw new NotEnoughResources();
-            }
-            
-        }
-
     }
 
     public class CreateBuilding
@@ -148,6 +128,58 @@ namespace Shard.Uni.Models
             Type = type;
             BuilderId = builderId;
             ResourceCategory = resourceCategory;
+        }
+
+        public Building ToClass(string system, string planet, IClock clock)
+        {
+            switch (Type)
+            {
+                case "mine":
+                    return new Mine(Id, Type, system, planet, BuilderId, clock, ResourceCategory);
+                case "starport":
+                    return new Starport(Id, Type, system, planet, BuilderId, clock, ResourceCategory);
+                default:
+                    throw new UnrecognizedBuilding("Unrecognized type of Building");
+            }
+        }
+    }
+
+    public class BuildingDto
+    {
+        public string Id { get; set; }
+        public string Type { get; set; }
+        public string System { get; set; }
+        public string Planet { get; set; }
+        public bool? IsBuilt { get; set; }
+        public string? EstimatedBuildTime { get; set; }
+        public string? BuilderId { get; set; }
+        public Task Construction { get; set; }
+        public CancellationTokenSource TokenSource;
+
+        public BuildingDto(string id, string type, string system, string planet, bool isBuilt, string estimatedBuildTime, string builderId, Task construction, CancellationTokenSource tokenSource)
+        {
+            Id = id;
+            Type = type;
+            System = system;
+            Planet = planet;
+            IsBuilt = isBuilt;
+            EstimatedBuildTime = estimatedBuildTime;
+            BuilderId = builderId;
+            Construction = construction;
+            TokenSource = tokenSource;
+        }
+
+        public BuildingDto(Building building)
+        {
+            Id = building.Id;
+            Type = building.Type;
+            System = building.System;
+            Planet = building.Planet;
+            IsBuilt = building.IsBuilt;
+            EstimatedBuildTime = building.EstimatedBuildTime;
+            BuilderId = building.BuilderId;
+            Construction = building.Construction;
+            TokenSource = building.TokenSource;
         }
     }
 
@@ -187,6 +219,15 @@ namespace Shard.Uni.Models
         public NotEnoughResources(string message) : base(message) { }
 
         public NotEnoughResources(string message, Exception exception) : base(message, exception) { }
+    }
+
+    public class UnrecognizedBuilding : Exception
+    {
+        public UnrecognizedBuilding() { }
+
+        public UnrecognizedBuilding(string message) : base(message) { }
+
+        public UnrecognizedBuilding(string message, Exception exception) : base(message, exception) { }
     }
 }
 

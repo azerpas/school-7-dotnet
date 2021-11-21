@@ -62,7 +62,7 @@ namespace Shard.Uni.Tests
             Unit unit = GetUnit("scout");
             User user = _userUnitTests.GetUser();
             Planet planet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == unit.Planet);
-            Building building = new Building(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, "solid", unit.Id, _fakeClock);
+            Building building = new Mine(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, unit.Id, _fakeClock, "solid");
             building.StartConstruction(_fakeClock, planet, user, "solid");
             Assert.Equal(TaskStatus.WaitingForActivation, building.Construction.Status);
         }
@@ -73,7 +73,7 @@ namespace Shard.Uni.Tests
             Unit unit = GetUnit("scout");
             User user = _userUnitTests.GetUser();
             Planet planet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == unit.Planet);
-            Building building = new Building(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, "solid", unit.Id, _fakeClock);
+            Building building = new Mine(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, unit.Id, _fakeClock, "solid");
             building.StartConstruction(_fakeClock, planet, user, "solid");
             await _fakeClock.Advance(new TimeSpan(0, 5, 0));
             await building.Construction;
@@ -89,7 +89,7 @@ namespace Shard.Uni.Tests
             planet.ResourceQuantity[ResourceKind.Gold] = 45;
             planet.ResourceQuantity[ResourceKind.Iron] = 120;
             planet.ResourceQuantity[ResourceKind.Titanium] = 50;
-            Building building = new Building(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, "solid", unit.Id, _fakeClock);
+            Building building = new Mine(Guid.NewGuid().ToString(), "mine", unit.System, unit.Planet, unit.Id, _fakeClock, "solid");
             building.StartConstruction(_fakeClock, planet, user, "solid");
             await _fakeClock.Advance(new TimeSpan(0, 5, 0));
             await building.Construction;
