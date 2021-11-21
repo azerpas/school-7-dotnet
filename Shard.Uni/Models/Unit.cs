@@ -15,15 +15,17 @@ namespace Shard.Uni.Models
         const int TimeToChangeSystem = 60;
 
         public string Id { get; }
+        public string Type { get; set; }
         public string System { get; set; }
         public string? Planet { get; set; }
         public string DestinationPlanet { get; set; }
         public string DestinationSystem { get; set; }
         public string EstimatedTimeOfArrival { get; set; }
 
-        public Unit(string system, string? planet)
+        public Unit(string type, string system, string? planet)
         {
             Id = Guid.NewGuid().ToString();
+            Type = Type;
             System = system;
             Planet = planet;
             DestinationSystem = system;
@@ -31,7 +33,7 @@ namespace Shard.Uni.Models
         }
 
         [JsonConstructorAttribute]
-        public Unit(string id, string system, string? planet)
+        public Unit(string type, string id, string system, string? planet)
         {
             Id = id;
             System = system;

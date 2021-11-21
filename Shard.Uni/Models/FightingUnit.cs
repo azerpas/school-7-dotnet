@@ -1,21 +1,20 @@
 ﻿using System;
 namespace Shard.Uni.Models
 {
-    public class FightingUnit : Unit
+    public abstract class FightingUnit : Unit
     {
-
         public int Health { get; set; }
         public int Damage { get; set; }
 
-        public FightingUnit(int health, int damage, string system, string? planet)
-            : base(system, planet)
+        public FightingUnit(string type, int health, int damage, string system, string? planet)
+            : base(type, system, planet)
         {
             Health = health;
             Damage = damage;
         }
 
-        public FightingUnit(string id, int damage, int health, string system, string? planet)
-            : base(id, system, planet)
+        public FightingUnit(string id, string type, int health, int damage, string system, string? planet)
+            : base(id, type, system, planet)
         {
             Health = health;
             Damage = damage;
