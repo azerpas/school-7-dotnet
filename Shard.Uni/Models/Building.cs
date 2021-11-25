@@ -71,6 +71,15 @@ namespace Shard.Uni.Models
                     { ResourceKind.Iron, 60 },
                     { ResourceKind.Gold, 20 }
                 }
+            },
+            {
+                typeof(Cargo),
+                new Dictionary<ResourceKind, int>
+                {
+                    { ResourceKind.Carbon, 10 },
+                    { ResourceKind.Iron, 10 },
+                    { ResourceKind.Gold, 5 }
+                }
             }
         };
 
