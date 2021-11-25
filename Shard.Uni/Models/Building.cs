@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Shard.Shared.Core;
@@ -146,6 +147,10 @@ namespace Shard.Uni.Models
 
     public class BuildingDto
     {
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ResourceCategory { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public List<QueueUnit>? Queue { get; set; }
         public string Id { get; set; }
         public string Type { get; set; }
         public string System { get; set; }
@@ -180,6 +185,14 @@ namespace Shard.Uni.Models
             BuilderId = building.BuilderId;
             Construction = building.Construction;
             TokenSource = building.TokenSource;
+            if(building.GetType() == typeof(Mine))
+            {
+                ResourceCategory = (building as Mine).ResourceCategory;
+            }
+            if(building.GetType() == typeof(Starport))
+            {
+                Queue = (building as Starport).Queue;
+            }
         }
     }
 

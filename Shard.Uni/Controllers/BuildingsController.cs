@@ -75,7 +75,7 @@ namespace Shard.Uni.Controllers
 
         // GET /users/{userId}/Buildings
         [HttpGet("/users/{userId}/Buildings")]
-        public ActionResult<List<Building>> Get(string userId)
+        public ActionResult<List<BuildingDto>> Get(string userId)
         {
             User user = _userService.Users.Find(user => user.Id == userId);
 
@@ -84,7 +84,7 @@ namespace Shard.Uni.Controllers
                 return NotFound("User not found");
             }
             // TODO: missing resourceCategory and queue for mine and starport
-            return _userService.Buildings[user.Id];
+            return _userService.Buildings[user.Id].Select(building => new BuildingDto(building)).ToList();
         }
 
         // GET /users/{userId}/Buildings/{buildingId}
