@@ -218,6 +218,12 @@ namespace Shard.Shared.Web.IntegrationTests
             });
         }
 
+        private static AuthenticationHeaderValue CreateShardAuthorizationHeader(string shardName, string sharedKey)
+        {
+            return new AuthenticationHeaderValue(
+                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"shard-{shardName}:{sharedKey}")));
+        }
+
         private static AuthenticationHeaderValue CreateAdminAuthorizationHeader()
         {
             return new AuthenticationHeaderValue(
