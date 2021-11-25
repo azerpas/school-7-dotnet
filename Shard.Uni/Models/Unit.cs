@@ -92,17 +92,17 @@ namespace Shard.Uni.Models
         public string? Planet { get; set; }
         public string DestinationPlanet { get; set; }
         public string DestinationSystem { get; set; }
-        public string EstimatedTimeOfArrival { get; set; }
-        public int Health { get; set; }
         public string DestinationShard { get; set; }
-        public Dictionary<string, int>? ResourceQuantity { get; set; }
+        public string EstimatedTimeOfArrival { get; set; }
+        public int? Health { get; set; }
+        public Dictionary<string, int>? ResourcesQuantity { get; set; }
 
         public Unit ToUnit()
         {
             switch (Type)
             {
                 case "cargo":
-                    return new Cargo(Id, System, Planet, ResourceQuantity);
+                    return new Cargo(Id, System, Planet, ResourcesQuantity);
                 case "builder":
                     return new Builder(Id, System, Planet);
                 case "scout":
@@ -127,11 +127,13 @@ namespace Shard.Uni.Models
         public string? Planet { get; set; }
         public string? DestinationPlanet { get; set; }
         public string? DestinationSystem { get; set; }
-        public string? EstimatedTimeOfArrival { get; set; }
-        public int? Health { get; set; }
         public string? DestinationShard { get; set; }
+        public string? EstimatedTimeOfArrival { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? Health { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public Dictionary<ResourceKind, int>? ResourceQuantity { get; set; }
-        public GetUnitDto(string id, string type, string system, string? planet, string? destinationSystem, string? destinationPlanet, string? estimatedTimeOfArrival, string? destinationShard, Dictionary<ResourceKind, int> resourceQuantity)
+        public GetUnitDto(string id, string type, string system, string? planet, string? destinationSystem, string? destinationPlanet, string? estimatedTimeOfArrival, int health, string? destinationShard, Dictionary<ResourceKind, int> resourceQuantity)
         {
             Id = id;
             Type = type;
@@ -140,6 +142,7 @@ namespace Shard.Uni.Models
             DestinationSystem = destinationSystem;
             DestinationPlanet = destinationPlanet;
             EstimatedTimeOfArrival = estimatedTimeOfArrival;
+            Health = health;
             DestinationShard = destinationShard;
             ResourceQuantity = resourceQuantity;
         }
@@ -153,6 +156,10 @@ namespace Shard.Uni.Models
             DestinationSystem = unit.DestinationSystem;
             DestinationPlanet = unit.DestinationPlanet;
             EstimatedTimeOfArrival = unit.EstimatedTimeOfArrival;
+            if (unit.GetType().IsSubclassOf(typeof(FightingUnit)))
+            {
+                Health = (unit as FightingUnit).Health;
+            }
             DestinationShard = unit.DestinationShard;
             if(unit.GetType() == typeof(Cargo))
             {
