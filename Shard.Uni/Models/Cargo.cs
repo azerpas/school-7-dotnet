@@ -31,12 +31,19 @@ namespace Shard.Uni.Models
             Dictionary<ResourceKind, int> resourcesToLoadUnload = new Dictionary<ResourceKind, int>();
             foreach (var resource in newResources)
             {
-                if(ResourceQuantity[resource.Key] > 0)
+                try
                 {
-                    int difference = resource.Value - ResourceQuantity[resource.Key];
-                    resourcesToLoadUnload[resource.Key] = difference;
+                    if (ResourceQuantity[resource.Key] > 0)
+                    {
+                        int difference = resource.Value - ResourceQuantity[resource.Key];
+                        resourcesToLoadUnload[resource.Key] = difference;
+                    }
+                    else
+                    {
+                        resourcesToLoadUnload[resource.Key] = resource.Value;
+                    }
                 }
-                else
+                catch (KeyNotFoundException)
                 {
                     resourcesToLoadUnload[resource.Key] = resource.Value;
                 }
