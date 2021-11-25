@@ -20,6 +20,7 @@ namespace Shard.Uni.Models
         public string? Planet { get; set; }
         public string DestinationPlanet { get; set; }
         public string DestinationSystem { get; set; }
+        public string? DestinationShard { get; set; }
         public string EstimatedTimeOfArrival { get; set; }
 
         public Unit(string type, string system, string? planet)
@@ -67,26 +68,6 @@ namespace Shard.Uni.Models
             System = unit.DestinationSystem;
             Planet = unit.DestinationPlanet;
         }
-
-        public static Unit FromType(string type, string system, string? planet)
-        {
-            string id = Guid.NewGuid().ToString();
-            switch (type)
-            {
-                case "builder":
-                    return new Builder(id, system, planet);
-                case "scout":
-                    return new Scout(id, system, planet);
-                case "bomber":
-                    return new Bomber(id, system, planet);
-                case "fighter":
-                    return new Fighter(id, system, planet);
-                case "cruiser":
-                    return new Cruiser(id, system, planet);
-                default:
-                    throw new UnrecognizedUnit("Unrecognized type of Unit");
-            }
-        }
     }
 
     public class UnitLocationDetailDto
@@ -113,11 +94,15 @@ namespace Shard.Uni.Models
         public string DestinationSystem { get; set; }
         public string EstimatedTimeOfArrival { get; set; }
         public int Health { get; set; }
+        public string DestinationShard { get; set; }
+        public Dictionary<string, int>? ResourceQuantity { get; set; }
 
         public Unit ToUnit()
         {
             switch (Type)
             {
+                case "cargo":
+                    return new Cargo(Id, System, Planet, ResourceQuantity);
                 case "builder":
                     return new Builder(Id, System, Planet);
                 case "scout":
@@ -130,6 +115,48 @@ namespace Shard.Uni.Models
                     return new Cruiser(Id, System, Planet);
                 default:
                     throw new UnrecognizedUnit("Unrecognized type of Unit");
+            }
+        }
+    }
+
+    public class GetUnitDto
+    {
+        public string Id { get; }
+        public string Type { get; set; }
+        public string System { get; set; }
+        public string? Planet { get; set; }
+        public string? DestinationPlanet { get; set; }
+        public string? DestinationSystem { get; set; }
+        public string? EstimatedTimeOfArrival { get; set; }
+        public int? Health { get; set; }
+        public string? DestinationShard { get; set; }
+        public Dictionary<ResourceKind, int>? ResourceQuantity { get; set; }
+        public GetUnitDto(string id, string type, string system, string? planet, string? destinationSystem, string? destinationPlanet, string? estimatedTimeOfArrival, string? destinationShard, Dictionary<ResourceKind, int> resourceQuantity)
+        {
+            Id = id;
+            Type = type;
+            System = system;
+            Planet = planet;
+            DestinationSystem = destinationSystem;
+            DestinationPlanet = destinationPlanet;
+            EstimatedTimeOfArrival = estimatedTimeOfArrival;
+            DestinationShard = destinationShard;
+            ResourceQuantity = resourceQuantity;
+        }
+
+        public GetUnitDto(Unit unit)
+        {
+            Id = unit.Id;
+            Type = unit.Type;
+            System = unit.System;
+            Planet = unit.Planet;
+            DestinationSystem = unit.DestinationSystem;
+            DestinationPlanet = unit.DestinationPlanet;
+            EstimatedTimeOfArrival = unit.EstimatedTimeOfArrival;
+            DestinationShard = unit.DestinationShard;
+            if(unit.GetType() == typeof(Cargo))
+            {
+                ResourceQuantity = (unit as Cargo).ResourceQuantity;
             }
         }
     }

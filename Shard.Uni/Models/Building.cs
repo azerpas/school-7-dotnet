@@ -209,6 +209,8 @@ namespace Shard.Uni.Models
         {
             switch (Type)
             {
+                case "cargo":
+                    return new Cargo(system, planet, null);
                 case "builder":
                     return new Builder(system, planet);
                 case "scout":
