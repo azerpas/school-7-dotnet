@@ -132,7 +132,7 @@ namespace Shard.Uni.Models
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? Health { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Dictionary<ResourceKind, int>? ResourceQuantity { get; set; }
+        public Dictionary<string, int>? ResourcesQuantity { get; set; }
         public GetUnitDto(string id, string type, string system, string? planet, string? destinationSystem, string? destinationPlanet, string? estimatedTimeOfArrival, int health, string? destinationShard, Dictionary<ResourceKind, int> resourceQuantity)
         {
             Id = id;
@@ -144,7 +144,7 @@ namespace Shard.Uni.Models
             EstimatedTimeOfArrival = estimatedTimeOfArrival;
             Health = health;
             DestinationShard = destinationShard;
-            ResourceQuantity = resourceQuantity;
+            ResourcesQuantity = resourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
         }
 
         public GetUnitDto(Unit unit)
@@ -163,7 +163,7 @@ namespace Shard.Uni.Models
             DestinationShard = unit.DestinationShard;
             if(unit.GetType() == typeof(Cargo))
             {
-                ResourceQuantity = (unit as Cargo).ResourceQuantity;
+                ResourcesQuantity = (unit as Cargo).ResourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
             }
         }
     }

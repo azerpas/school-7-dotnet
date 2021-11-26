@@ -35,7 +35,7 @@ namespace Shard.Uni.Controllers
 
         // GET /Users/{userId}/Units/{unitId}
         [HttpGet("{userId}/Units/{unitId}")]
-        public async Task<ActionResult<Unit>> Get(string userId, string unitId)
+        public async Task<ActionResult<GetUnitDto>> Get(string userId, string unitId)
         {
             List<Unit> units = _userService.Units[userId];
             Unit unit = units.Find(Unit => Unit.Id == unitId);
@@ -64,7 +64,7 @@ namespace Shard.Uni.Controllers
                     if (timeBeforeArrival > 2.0)
                     {   // Contient la destination
                         unit.Planet = null;
-                        return unit;
+                        return new GetUnitDto(unit);
                     }
                     else
                     {   // Contient l’arrivée au lieu
@@ -72,22 +72,22 @@ namespace Shard.Uni.Controllers
                         {
                             int delay = Convert.ToInt32((arrival - _clock.Now).TotalMilliseconds);
                             await _clock.Delay(delay);
-                            return _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                            return new GetUnitDto(_userService.Units[userId].Find(Unit => Unit.Id == unitId));
                         }
                         else
                         {   // 0 secondes: 200 OK
-                            return unit;
+                            return new GetUnitDto(unit);
                         }
                         
                     }
                 }
-                else return unit;
+                else return new GetUnitDto(unit);
             }  
         }
 
         // PUT /Users/{userId}/Units/{unitId}
         [HttpPut("{userId}/Units/{unitId}")]
-        public ActionResult<Unit> Put(string userId, string unitId, CreateUnitDto spaceship)
+        public ActionResult<GetUnitDto> Put(string userId, string unitId, CreateUnitDto spaceship)
         {
             List<Unit> units = _userService.Units[userId];
 
@@ -122,17 +122,58 @@ namespace Shard.Uni.Controllers
                     return Unauthorized();
                 }
 
-                return unit;
+                return new GetUnitDto(unit);
             }
             else
             {
+                Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
+                Unit newUnit = spaceship.ToUnit();
+
+                // Cargo
+                if (spaceship.ResourcesQuantity != null)
+                {
+                    if(spaceship.Type != "cargo")
+                    {
+                        return BadRequest("Can only load / unload resources on Cargo spaceship");
+                    }
+                    Building buildingOnCurrentPlanet = _userService.Buildings[userId]
+                        .Find(building => building.Planet == unt.Planet && building.GetType() == typeof(Starport));
+                    // Check if there's a Starport on the planet
+                    if(buildingOnCurrentPlanet != null)
+                    {
+                        User user = _userService.Users.Find(User => User.Id == userId);
+                        Dictionary<ResourceKind, int> resourcesToLoadUnload = (oldUnit as Cargo)
+                            .ResourcesToLoadUnload(spaceship.ResourcesQuantity.ToDictionary(
+                                resource => (ResourceKind)Enum.Parse(typeof(ResourceKind), Utils.Strings.Capitalize(resource.Key)), 
+                                resource => resource.Value
+                            ));
+                        foreach(var resource in resourcesToLoadUnload)
+                        {
+                            if(resource.Value > 0) // load
+                            {
+                                if(user.ResourcesQuantity[resource.Key] - resource.Value > 0)
+                                {
+                                    user.ResourcesQuantity[resource.Key] = user.ResourcesQuantity[resource.Key] - resource.Value;
+                                }
+                                else return BadRequest($"User doesn't have enough resources for {resource.Key}. To add/deduce: {resource.Value}, current {user.ResourcesQuantity[resource.Key]}");
+                            }
+                            else // unload
+                            {
+                                user.ResourcesQuantity[resource.Key] += -resource.Value; // - to convert to positive int
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest("Could not find Starport on the current planet");
+                    }
+                }
+
                 if (destinationSystem == null)
                 {
                     return NotFound("Destination System not found");
                 }
-
-                Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
-                Unit newUnit = spaceship.ToUnit();
+                
                 _userService.Units[userId].Remove(oldUnit);
                 _userService.Units[userId].Add(newUnit);
                 
@@ -153,7 +194,7 @@ namespace Shard.Uni.Controllers
                         _userService.Buildings[userId].RemoveAll(Building => Building.Id == building.Id);
                     }
                 }
-                return newUnit;
+                return new GetUnitDto(newUnit);
             }
         }
 
