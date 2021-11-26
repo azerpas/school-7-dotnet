@@ -8,6 +8,7 @@ namespace Shard.Uni
             public const string Admin = "admin";
             public const string User = "user";
             public const string Player = "player";
+            public const string Shard = "shard";
         }
 
         public static class Fighters

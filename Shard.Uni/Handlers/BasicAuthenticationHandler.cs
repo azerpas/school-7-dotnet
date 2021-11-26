@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Shard.Uni.Handlers
@@ -36,11 +37,8 @@ namespace Shard.Uni.Handlers
                 string auth = Encoding.UTF8.GetString(Convert.FromBase64String(header));
                 if(auth != null)
                 {
-                    if(auth == "admin:password")
+                    if (auth == "admin:password")
                     {
-                        IEnumerable<ClaimsIdentity> claims = new List<ClaimsIdentity>() {
-                            new ClaimsIdentity()
-                        };
                         return Task.Run(() => AuthenticateResult.Success(
                             new AuthenticationTicket(
                                 new ClaimsPrincipal(
@@ -57,6 +55,33 @@ namespace Shard.Uni.Handlers
                                 "Basic"
                             )
                         ));
+                    }
+                    else
+                    {
+                        string pattern = @"shard-(?<nomDuShard>.*):(?<clefPartagee>.*)";
+                        Match match = Regex.Match(auth, pattern);
+                        if (match.Success)
+                        {
+                            GroupCollection groups = match.Groups;
+                            string shardName = groups["nomDuShard"].Value;
+                            string clefPartagee = groups["clefPartagee"].Value;
+                            return Task.Run(() => AuthenticateResult.Success(
+                                new AuthenticationTicket(
+                                    new ClaimsPrincipal(
+                                        new List<ClaimsIdentity>
+                                        {
+                                            new ClaimsIdentity(
+                                                new List<Claim>
+                                                {
+                                                    new Claim(ClaimTypes.Role, Constants.Roles.Shard)
+                                                }
+                                            )
+                                        }
+                                    ),
+                                    "Basic"
+                                )
+                            ));
+                        }
                     }
                 }
             }
