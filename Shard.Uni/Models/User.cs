@@ -12,20 +12,23 @@ namespace Shard.Uni.Models
         public string DateOfCreation { get; }
         public Dictionary<ResourceKind, int> ResourcesQuantity { get; }
 
-        public User(string id, string pseudo)
+        public User(string id, string pseudo, bool? shard = false)
         {
             Id = id;
             Pseudo = pseudo;
             DateOfCreation = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:sssK");
-            ResourcesQuantity = new Dictionary<ResourceKind, int> {
-                { ResourceKind.Gold, 0 },
-                { ResourceKind.Aluminium, 0 },
-                { ResourceKind.Carbon, 20 },
-                { ResourceKind.Iron, 10 },
-                { ResourceKind.Oxygen, 50 },
-                { ResourceKind.Titanium, 0 },
-                { ResourceKind.Water, 50 },
-            };
+            if (shard != null && shard != false)
+            {
+                ResourcesQuantity = new Dictionary<ResourceKind, int> {
+                    { ResourceKind.Gold, 0 },
+                    { ResourceKind.Aluminium, 0 },
+                    { ResourceKind.Carbon, 20 },
+                    { ResourceKind.Iron, 10 },
+                    { ResourceKind.Oxygen, 50 },
+                    { ResourceKind.Titanium, 0 },
+                    { ResourceKind.Water, 50 },
+                };
+            }
         }
 
         public User(string id, string pseudo, string dateOfCreation, Dictionary<ResourceKind, int> resources)

@@ -53,23 +53,27 @@ namespace Shard.Uni.Controllers
             User user;
             if (previousUser == null) // Adding action
             {
-                user = new User(userDto.Id, userDto.Pseudo);
+                user = new User(userDto.Id, userDto.Pseudo, HttpContext.User.IsInRole(Constants.Roles.Shard) ? true : false);
                 // Save User
                 _userService.Users.Add(user);
 
-                // Get Random System
-                Random random = new Random();
-                int index = random.Next(_sectorService.Systems.Count);
-                StarSystem system = _sectorService.Systems[index];
-                // Get Random Planet
-                index = random.Next(system.Planets.Count);
-                Planet planet = system.Planets[index];
+                // If not remote shard
+                if (!HttpContext.User.IsInRole(Constants.Roles.Shard))
+                {
+                    // Get Random System
+                    Random random = new Random();
+                    int index = random.Next(_sectorService.Systems.Count);
+                    StarSystem system = _sectorService.Systems[index];
+                    // Get Random Planet
+                    index = random.Next(system.Planets.Count);
+                    Planet planet = system.Planets[index];
 
-                // Add default Unit
-                Unit unitScout = new Scout(system.Name, null);
-                Unit unitBuilder = new Builder(system.Name, null);
-                _userService.Units.Add(user.Id, new List<Unit> { unitScout, unitBuilder });
-                _userService.Buildings.Add(user.Id, new List<Building> { });
+                    // Add default Unit
+                    Unit unitScout = new Scout(system.Name, null);
+                    Unit unitBuilder = new Builder(system.Name, null);
+                    _userService.Units.Add(user.Id, new List<Unit> { unitScout, unitBuilder });
+                    _userService.Buildings.Add(user.Id, new List<Building> { });
+                }
             }
             else // Replacement action
             {
