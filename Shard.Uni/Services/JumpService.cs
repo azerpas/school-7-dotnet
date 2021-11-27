@@ -77,7 +77,15 @@ namespace Shard.Uni.Services
         public async Task SystemAndPlanetExists(string system, string planet, string shard)
         {
             var theShard = GetShardData(shard);
-            HttpResponseMessage httpResponse = await _client.GetAsync($"{theShard.Value.BaseUri}/Systems/{system}");
+            HttpResponseMessage httpResponse;
+            try
+            {
+                httpResponse = await _client.GetAsync($"{theShard.Value.BaseUri}/Systems/{system}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error on request {ex.Message}");
+            }
             if (!httpResponse.IsSuccessStatusCode) 
             {
                 throw new Exception($"System {system} not found");

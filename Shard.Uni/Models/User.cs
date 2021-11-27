@@ -29,6 +29,18 @@ namespace Shard.Uni.Models
                     { ResourceKind.Water, 50 },
                 };
             }
+            else
+            {
+                ResourcesQuantity = new Dictionary<ResourceKind, int> {
+                    { ResourceKind.Gold, 0 },
+                    { ResourceKind.Aluminium, 0 },
+                    { ResourceKind.Carbon, 0 },
+                    { ResourceKind.Iron, 0 },
+                    { ResourceKind.Oxygen, 0 },
+                    { ResourceKind.Titanium, 0 },
+                    { ResourceKind.Water, 0 },
+                };
+            }
         }
 
         public User(string id, string pseudo, string dateOfCreation, Dictionary<ResourceKind, int> resources)
@@ -104,7 +116,7 @@ namespace Shard.Uni.Models
         public string Id { get; }
         public string Pseudo { get; }
         public string DateOfCreation { get; }
-        public Dictionary<string, int> resourcesQuantity { get; }
+        public Dictionary<string, int>? resourcesQuantity { get; }
 
         public UserResourcesDetailDto(User user)
         {

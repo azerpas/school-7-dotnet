@@ -85,15 +85,25 @@ namespace Shard.Uni.Handlers
                     }
                 }
             }
-            // TODO: return new Ticket with ClaimTypes.Role : Constants.Roles.User
 
             // Unauthenticated
             return Task.Run(() => AuthenticateResult.Success(
                 new AuthenticationTicket(
-                    new ClaimsPrincipal(), "Basic"   
-                )    
+                    new ClaimsPrincipal(
+                        new List<ClaimsIdentity>
+                        {
+                            new ClaimsIdentity(
+                                new List<Claim>
+                                {
+                                    new Claim(ClaimTypes.Role, Constants.Roles.User)
+                                }
+                            )
+                        }
+                    ),
+                    "Basic"
+                )
             ));
-            
+
         }
     }
 }

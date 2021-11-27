@@ -17,12 +17,14 @@ namespace Shard.Uni.Controllers
         private UserService _userService;
         private readonly SectorService _sectorService;
         private IClock _clock;
+        private JumpService _jumpService;
 
-        public UnitsController(UserService userService, SectorService sectorService, IClock clock)
+        public UnitsController(UserService userService, SectorService sectorService, IClock clock, JumpService jumpService)
         {
             _userService = userService;
             _sectorService = sectorService;
             _clock = clock;
+            _jumpService = jumpService;
         }
 
         // GET /Users/{userId}/Units
@@ -87,7 +89,7 @@ namespace Shard.Uni.Controllers
 
         // PUT /Users/{userId}/Units/{unitId}
         [HttpPut("{userId}/Units/{unitId}")]
-        public ActionResult<GetUnitDto> Put(string userId, string unitId, CreateUnitDto spaceship)
+        public async Task<ActionResult<GetUnitDto>> Put(string userId, string unitId, CreateUnitDto spaceship)
         {
             List<Unit> units = _userService.Units[userId];
 
@@ -129,6 +131,32 @@ namespace Shard.Uni.Controllers
                 Unit oldUnit = _userService.Units[userId].Find(Unit => Unit.Id == unitId);
                 Unit newUnit = spaceship.ToUnit();
 
+                // Jump
+                if(spaceship.DestinationShard != null)
+                {
+                    if (HttpContext.User.IsInRole(Constants.Roles.User) || HttpContext.User.IsInRole(Constants.Roles.Admin))
+                    {
+                        /*
+                        try
+                        {
+                            await _jumpService.SystemAndPlanetExists(spaceship.DestinationSystem, spaceship.DestinationPlanet, spaceship.DestinationShard);
+                        }
+                        catch (Exception ex)
+                        {
+                            return BadRequest($"{ex.Message}");
+                        }
+                        */
+                        User user = _userService.Users.Find(User => User.Id == userId);
+                        var unitUri = await _jumpService.Jump(newUnit, user, spaceship.DestinationShard);
+                        _userService.Units[userId].Remove(oldUnit);
+                        return RedirectPermanentPreserveMethod(unitUri);
+                    }
+                    else
+                    {
+                        return Forbid("You're not authorize to redirect shards");
+                    }
+                }
+
                 // Cargo
                 if (spaceship.ResourcesQuantity != null)
                 {
@@ -137,7 +165,7 @@ namespace Shard.Uni.Controllers
                         return BadRequest("Can only load / unload resources on Cargo spaceship");
                     }
                     Building buildingOnCurrentPlanet = _userService.Buildings[userId]
-                        .Find(building => building.Planet == unt.Planet && building.GetType() == typeof(Starport));
+                        .Find(building => building.Planet == spaceship.Planet && building.GetType() == typeof(Starport));
                     // Check if there's a Starport on the planet
                     if(buildingOnCurrentPlanet != null)
                     {
