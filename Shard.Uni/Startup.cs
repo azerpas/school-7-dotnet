@@ -15,6 +15,7 @@ using Shard.Uni.Services;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Shard.Uni.Handlers;
+using Shard.Uni.Models;
 
 namespace Shard.Uni
 {
@@ -33,9 +34,25 @@ namespace Shard.Uni
             services.AddAuthentication("Basic").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
             services.AddSingleton<MapGenerator>();
             services.Configure<MapGeneratorOptions>(options => options.Seed = "Uni");
+            services.AddSingleton<Wormhole>();
+            services.Configure<WormholeOptions>(
+                options => options.shards = Configuration.GetSection("Wormholes").GetChildren()
+                    .ToDictionary(
+                        Section => Section.Key, 
+                        Section => new WormholeData(
+                            Section.GetValue<string>("baseUri"), 
+                            Section.GetValue<string>("system"), 
+                            Section.GetValue<string>("user"), 
+                            Section.GetValue<string>("sharedPassword")
+                        )
+                    )
+                );
             services.AddSingleton<SectorService>();
             services.AddSingleton<UserService>();
+            services.AddSingleton<JumpService>();
             services.AddSingleton<Shared.Core.SystemClock>();
+            services.AddHttpClient();
+            services.AddTransient<JumpService>();
             services.AddHostedService<UnitsHostedService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
