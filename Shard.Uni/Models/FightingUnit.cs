@@ -25,7 +25,7 @@ namespace Shard.Uni.Models
             Timeout = timeout;
         }
 
-        public static List<Type> GetFightingTypes => new List<Type> { typeof(Bomber), typeof(Fighter), typeof(Cruiser) };
+        public static List<Type> GetFightingTypes => new List<Type> { typeof(Bomber), typeof(Fighter), typeof(Cruiser), typeof(Cargo) };
     }
 }
 

@@ -102,7 +102,7 @@ namespace Shard.Uni.Models
             switch (Type)
             {
                 case "cargo":
-                    return new Cargo(Id, System, Planet, ResourcesQuantity);
+                    return new Cargo(Id, System, Planet, ResourcesQuantity, Health);
                 case "builder":
                     return new Builder(Id, System, Planet);
                 case "scout":

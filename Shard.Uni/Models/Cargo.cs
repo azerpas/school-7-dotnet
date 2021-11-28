@@ -5,20 +5,20 @@ using System.Linq;
 
 namespace Shard.Uni.Models
 {
-    public class Cargo : Unit
+    public class Cargo : FightingUnit
     {
         public Dictionary<ResourceKind, int> ResourceQuantity { get; }
 
-        public Cargo(string system, string? planet, Dictionary<string, int>? resourceQuantity) 
-            : base("cargo", system, planet) 
+        public Cargo(string system, string? planet, Dictionary<string, int>? resourceQuantity, int? health = null) 
+            : base("cargo", health ?? Constants.Fighters.Health.Cargo, Constants.Fighters.Damage.Cargo, Constants.Fighters.Timeout.Cargo, system, planet) 
         {
             ResourceQuantity = resourceQuantity != null ? resourceQuantity.ToDictionary(
                 resource => (ResourceKind)Enum.Parse(typeof(ResourceKind), Utils.Strings.Capitalize(resource.Key)), 
                 resource => resource.Value
             ) : new Dictionary<ResourceKind, int> { };
         }
-        public Cargo(string id, string system, string? planet, Dictionary<string, int>? resourceQuantity) 
-            : base(id, "cargo", system, planet) 
+        public Cargo(string id, string system, string? planet, Dictionary<string, int>? resourceQuantity, int? health) 
+            : base(id, "cargo", health ?? Constants.Fighters.Health.Cargo, Constants.Fighters.Damage.Cargo, Constants.Fighters.Timeout.Cargo, system, planet) 
         {
             ResourceQuantity = resourceQuantity != null ? resourceQuantity.ToDictionary(
                 resource => (ResourceKind)Enum.Parse(typeof(ResourceKind), Utils.Strings.Capitalize(resource.Key)), 

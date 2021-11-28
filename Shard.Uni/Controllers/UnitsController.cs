@@ -29,10 +29,10 @@ namespace Shard.Uni.Controllers
 
         // GET /Users/{userId}/Units
         [HttpGet("{userId}/Units")]
-        public ActionResult<List<Unit>> Get(string userId)
+        public ActionResult<List<GetUnitDto>> Get(string userId)
         {
             List<Unit> units = _userService.Units[userId];
-            return units;
+            return units.Select(Unit => new GetUnitDto(Unit)).ToList();
         }
 
         // GET /Users/{userId}/Units/{unitId}
