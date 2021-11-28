@@ -53,7 +53,15 @@ namespace Shard.Uni.Controllers
             User user;
             if (previousUser == null) // Adding action
             {
-                user = new User(userDto.Id, userDto.Pseudo, HttpContext.User.IsInRole(Constants.Roles.Shard) ? true : false);
+                if (HttpContext.User.IsInRole(Constants.Roles.Shard))
+                {
+                    user = new User(userDto.Id, userDto.Pseudo, true, userDto.DateOfCreation);
+                }
+                else
+                {
+                    user = new User(userDto.Id, userDto.Pseudo);
+                }
+
                 // Save User
                 _userService.Users.Add(user);
 

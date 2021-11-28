@@ -12,12 +12,12 @@ namespace Shard.Uni.Models
         public string DateOfCreation { get; }
         public Dictionary<ResourceKind, int> ResourcesQuantity { get; }
 
-        public User(string id, string pseudo, bool? shard = false)
+        public User(string id, string pseudo, bool? shard = false, string? dateOfCreation = null)
         {
             Id = id;
             Pseudo = pseudo;
-            DateOfCreation = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:sssK");
-            if (shard != null && shard != false)
+            DateOfCreation = dateOfCreation != null ? dateOfCreation : DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:sssK");
+            if (shard != true)
             {
                 ResourcesQuantity = new Dictionary<ResourceKind, int> {
                     { ResourceKind.Gold, 0 },
@@ -97,13 +97,15 @@ namespace Shard.Uni.Models
     {
         public string Id { get; }
         public string Pseudo { get; }
+        public string? DateOfCreation { get; }
         public Dictionary<string, int>? ResourcesQuantity { get; }
 
-        public CreateUserDto(string id, string pseudo, Dictionary<string, int>? resourcesQuantity)
+        public CreateUserDto(string id, string pseudo, Dictionary<string, int>? resourcesQuantity, string? dateOfCreation)
         {
             Id = id;
             Pseudo = pseudo;
             ResourcesQuantity = resourcesQuantity;
+            DateOfCreation = dateOfCreation;
         }
     }
 
