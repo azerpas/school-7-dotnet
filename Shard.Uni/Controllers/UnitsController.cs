@@ -31,7 +31,15 @@ namespace Shard.Uni.Controllers
         [HttpGet("{userId}/Units")]
         public ActionResult<List<GetUnitDto>> Get(string userId)
         {
-            List<Unit> units = _userService.Units[userId];
+            List<Unit> units;
+            try
+            {
+                units = _userService.Units[userId];
+            }
+            catch (KeyNotFoundException)
+            {
+                return new List<GetUnitDto> { };
+            }
             return units.Select(Unit => new GetUnitDto(Unit)).ToList();
         }
 
