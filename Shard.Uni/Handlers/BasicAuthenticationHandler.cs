@@ -73,7 +73,8 @@ namespace Shard.Uni.Handlers
                                             new ClaimsIdentity(
                                                 new List<Claim>
                                                 {
-                                                    new Claim(ClaimTypes.Role, Constants.Roles.Shard)
+                                                    new Claim(ClaimTypes.Role, Constants.Roles.Shard),
+                                                    new Claim(ClaimTypes.Name, shardName)
                                                 }
                                             )
                                         }

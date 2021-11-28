@@ -130,6 +130,11 @@ namespace Shard.Uni.Controllers
                 // Admin or Shard
                 if (HttpContext.User.IsInRole(Constants.Roles.Admin) || HttpContext.User.IsInRole(Constants.Roles.Shard))
                 {
+                    if (HttpContext.User.IsInRole(Constants.Roles.Shard))
+                    {
+                        KeyValuePair<string, WormholeData> shard = _jumpService.GetShardData(HttpContext.User.Identity.Name);
+                        unit.System = shard.Value.System;
+                    }
                     _userService.Units[userId].Add(unit);
                 } 
                 // User
