@@ -91,7 +91,6 @@ namespace Shard.Uni.Controllers
         [HttpPut("{userId}/Units/{unitId}")]
         public async Task<ActionResult<GetUnitDto>> Put(string userId, string unitId, CreateUnitDto spaceship)
         {
-            List<Unit> units = _userService.Units[userId];
 
             if (unitId != spaceship.Id)
             {
@@ -101,15 +100,27 @@ namespace Shard.Uni.Controllers
             StarSystem destinationSystem = _sectorService.Systems.Find(StarSystem => StarSystem.Name == spaceship.DestinationSystem);
             Planet destinationPlanet = _sectorService.GetAllPlanets().Find(Planet => Planet.Name == spaceship.DestinationPlanet);
 
-            Unit unt = units.Find(Unit => Unit.Id == unitId);
+            List<Unit> units;
+            Unit unt;
+            try
+            {
+                units = _userService.Units[userId];
+                unt = units.Find(Unit => Unit.Id == unitId);
+            }
+            catch (KeyNotFoundException)
+            {
+                _userService.Units.Add(userId, new List<Unit> { });
+                unt = null;
+            }
+            
 
             // Unit does not exists
             if (unt == null)
             {
                 Unit unit = spaceship.ToUnit();
 
-                // Admin
-                if (HttpContext.User.IsInRole(Constants.Roles.Admin))
+                // Admin or Shard
+                if (HttpContext.User.IsInRole(Constants.Roles.Admin) || HttpContext.User.IsInRole(Constants.Roles.Shard))
                 {
                     _userService.Units[userId].Add(unit);
                 } 
