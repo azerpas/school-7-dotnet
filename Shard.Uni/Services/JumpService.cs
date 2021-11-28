@@ -64,7 +64,7 @@ namespace Shard.Uni.Services
         public async Task<string> PutUnitInDistantShard(string userId, Unit unit, string shard)
         {
             var theShard = GetShardData(shard);
-            var body = JsonContent.Create(unit);
+            var body = JsonContent.Create(unit, unit.GetType());
 
             HttpResponseMessage httpResponse = await _client.PutAsync($"{theShard.Value.BaseUri}/users/{userId}/units/{unit.Id}", body);
             if (!httpResponse.IsSuccessStatusCode)
