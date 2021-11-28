@@ -163,7 +163,7 @@ namespace Shard.Uni.Models
             DestinationShard = unit.DestinationShard;
             if(unit.GetType() == typeof(Cargo))
             {
-                ResourcesQuantity = (unit as Cargo).ResourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
+                ResourcesQuantity = (unit as Cargo).ResourcesQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
             }
         }
     }

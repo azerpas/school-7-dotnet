@@ -135,12 +135,12 @@ namespace Shard.Uni.Controllers
                 // User
                 else if (HttpContext.User.IsInRole(Constants.Roles.User))
                 {
-                    return Forbid();
+                    return Unauthorized();
                 }
                 // Unauthenticated
                 else
                 {
-                    return Unauthorized();
+                    return Forbid();
                 }
 
                 return new GetUnitDto(unit);
@@ -179,6 +179,11 @@ namespace Shard.Uni.Controllers
                 // Cargo
                 if (spaceship.ResourcesQuantity != null)
                 {
+                    // This condition verify that there's an intent of moving while also having an intent of load/unload
+                    if(spaceship.DestinationSystem != null && spaceship.DestinationPlanet == null && !(oldUnit as Cargo).HaveEqualResources(spaceship.ResourcesQuantity))
+                    {
+                        return BadRequest("Temporary fix as it supposed to mean that the unit will exit the planet, thus canno't load/unload");
+                    }
                     if(spaceship.Type != "cargo")
                     {
                         return BadRequest("Can only load / unload resources on Cargo spaceship");
