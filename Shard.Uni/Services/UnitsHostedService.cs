@@ -22,16 +22,10 @@ namespace Shard.Uni.Services
         {
             _userService = userService;
             _clock = clock;
-            // TODO: remove
-            // Make damages
-            // FightTask = InflictDamages();
-            // Clear units
-            // ClearTask = ClearUnits();
         }
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            // TODO:
             // Make damages
             FightTask = InflictDamages();
             // Clear units

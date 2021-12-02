@@ -13,20 +13,27 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "launchUrl": "Systems",
-      "hotReloadProfile": "aspnetcore",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "hotReloadProfile": "aspnetcore"
     },
     "Shard.Uni": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "Systems",
-      "hotReloadProfile": "aspnetcore",
-      "applicationUrl": "https://localhost:34875;http://localhost:46715",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "https://localhost:34875;http://localhost:46715",
+      "hotReloadProfile": "aspnetcore"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/Systems",
+      "publishAllPorts": true,
+      "useSSL": true
     }
   }
 }

@@ -53,6 +53,7 @@ namespace Shard.Uni
             services.AddSingleton<Shared.Core.SystemClock>();
             services.AddHttpClient();
             services.AddTransient<JumpService>();
+            services.AddTransient<IClock, Shared.Core.SystemClock>();
             services.AddHostedService<UnitsHostedService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
