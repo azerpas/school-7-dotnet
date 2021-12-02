@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  shard.uni:
+    image: ${DOCKER_REGISTRY-}sharduni
+    build:
+      context: .
+      dockerfile: Shard.Uni/Dockerfile
+
+  mongo:
+    image: mongo

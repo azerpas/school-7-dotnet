@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  shard.uni:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - Database__ConnectionString=mongodb://mongo:27017
+    ports:
+      - "80"
+      - "443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  mongo:
+    ports:
+      - "27017:27017"

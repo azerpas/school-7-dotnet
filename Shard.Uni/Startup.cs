@@ -58,7 +58,7 @@ namespace Shard.Uni
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v5", new OpenApiInfo { Title = "Shard.Uni", Version = "v5" });
+                c.SwaggerDoc("v7", new OpenApiInfo { Title = "Shard.Uni", Version = "v7" });
             });
         }
 
@@ -69,7 +69,7 @@ namespace Shard.Uni
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Shard.Uni v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v7/swagger.json", "Shard.Uni v7"));
             }
 
             app.UseHttpsRedirection();

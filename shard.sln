@@ -1,15 +1,16 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29021.104
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shard.Shared.Web.IntegrationTests", "Shard.Shared.Web.IntegrationTests\Shard.Shared.Web.IntegrationTests.csproj", "{2BF7FDA4-BBCA-415B-8310-BC26B7C3F20B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shard.Shared.Core", "Shard.Shared.Core\Shard.Shared.Core.csproj", "{7D73D8F4-7CA6-443D-AC94-5881C4C935FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shard.Shared.Core", "Shard.Shared.Core\Shard.Shared.Core.csproj", "{7D73D8F4-7CA6-443D-AC94-5881C4C935FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shard.Uni", "Shard.Uni\Shard.Uni.csproj", "{09ACD65B-3B11-4448-B243-448083D02627}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shard.Uni", "Shard.Uni\Shard.Uni.csproj", "{09ACD65B-3B11-4448-B243-448083D02627}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shard.Uni.Tests", "Shard.Uni.Tests\Shard.Uni.Tests.csproj", "{C8E6952B-5A95-4D05-9B56-742BB7A69D75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shard.Uni.Tests", "Shard.Uni.Tests\Shard.Uni.Tests.csproj", "{C8E6952B-5A95-4D05-9B56-742BB7A69D75}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{1F32830A-D0BA-4B5B-AAFF-79A13F1D800E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +34,10 @@ Global
 		{C8E6952B-5A95-4D05-9B56-742BB7A69D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8E6952B-5A95-4D05-9B56-742BB7A69D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8E6952B-5A95-4D05-9B56-742BB7A69D75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F32830A-D0BA-4B5B-AAFF-79A13F1D800E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F32830A-D0BA-4B5B-AAFF-79A13F1D800E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F32830A-D0BA-4B5B-AAFF-79A13F1D800E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F32830A-D0BA-4B5B-AAFF-79A13F1D800E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
