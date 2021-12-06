@@ -16,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Shard.Uni.Handlers;
 using Shard.Uni.Models;
+using Shard.Uni.Repositories;
 
 namespace Shard.Uni
 {
@@ -62,6 +63,10 @@ namespace Shard.Uni
             {
                 c.SwaggerDoc("v7", new OpenApiInfo { Title = "Shard.Uni", Version = "v7" });
             });
+
+            // Repositories
+            services.AddSingleton<IUserRepository, UserRepository>();
+            services.AddSingleton<ISectorRepository, SectorRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
