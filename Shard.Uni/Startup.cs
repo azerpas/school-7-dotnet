@@ -47,6 +47,8 @@ namespace Shard.Uni
                         )
                     )
                 );
+            services.AddSingleton<MongoConnector>();
+            services.Configure<MongoConnectorOptions>(Configuration.GetSection("Database"));
             services.AddSingleton<SectorService>();
             services.AddSingleton<UserService>();
             services.AddSingleton<JumpService>();

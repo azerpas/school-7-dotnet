@@ -6,6 +6,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - Database__ConnectionString=mongodb://mongo:27017
+      - Database__Name=Uni
     ports:
       - "80"
       - "443"
