@@ -14,6 +14,7 @@ namespace Shard.Uni
         {
             var settings = options.Value;
             var client = new MongoClient(settings.ConnectionString);
+            Connector = client.GetDatabase(settings.DatabaseName);
             var pack = new ConventionPack
             {
                 new EnumRepresentationConvention(MongoDB.Bson.BsonType.String)
