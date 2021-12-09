@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Shard.Uni.Models;
+using Shard.Uni.Repositories;
 using Shard.Uni.Services;
 
 namespace Shard.Uni.Controllers
@@ -12,10 +13,12 @@ namespace Shard.Uni.Controllers
     {
 
         private readonly SectorService _sectorService;
+        private readonly ISectorRepository _sectorRepository;
 
-        public SystemsController(SectorService sectorService)
+        public SystemsController(SectorService sectorService, ISectorRepository sectorRepository)
         {
             _sectorService = sectorService;
+            _sectorRepository = sectorRepository;
         }
 
         // GET: /Systems

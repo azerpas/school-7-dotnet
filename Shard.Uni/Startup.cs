@@ -63,6 +63,7 @@ namespace Shard.Uni
             {
                 c.SwaggerDoc("v7", new OpenApiInfo { Title = "Shard.Uni", Version = "v7" });
             });
+            services.AddLogging();
 
             // Repositories
             services.AddSingleton<IUserRepository, UserRepository>();

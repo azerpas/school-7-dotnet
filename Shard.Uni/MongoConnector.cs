@@ -14,19 +14,19 @@ namespace Shard.Uni
         {
             var settings = options.Value;
             var client = new MongoClient(settings.ConnectionString);
-            Connector = client.GetDatabase(settings.DatabaseName);
+            Connector = client.GetDatabase(settings.Name);
             var pack = new ConventionPack
             {
                 new EnumRepresentationConvention(MongoDB.Bson.BsonType.String)
             };
             ConventionRegistry.Register("EnumStringConvention", pack, t => true);
-            logger.LogInformation($"Database mongo is {settings.ConnectionString} - {settings.DatabaseName}");
+            logger.LogInformation($"Database mongo is {settings.ConnectionString} - {settings.Name}");
         }
     }
 
     public class MongoConnectorOptions
     {
         public string ConnectionString { get; set; }
-        public string DatabaseName { get; set; }
+        public string Name { get; set; }
     }
 }
