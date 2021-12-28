@@ -68,6 +68,8 @@ namespace Shard.Uni
             // Repositories
             services.AddSingleton<IUserRepository, UserRepository>();
             services.AddSingleton<ISectorRepository, SectorRepository>();
+            services.AddSingleton<IUnitRepository, UnitRepository>();
+            services.AddSingleton<IBuildingRepository, BuildingRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
