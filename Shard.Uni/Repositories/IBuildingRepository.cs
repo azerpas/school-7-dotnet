@@ -10,5 +10,6 @@ namespace Shard.Uni.Repositories
         void RegisterClassMap();
         Task<IReadOnlyList<Building>> GetBuildings();
         Task<Building> GetBuildingById(string id);
+        void CreateBuilding(Building building);
     }
 }

@@ -4,6 +4,7 @@ using Shard.Uni.Models;
 using System.Collections.Generic;
 using System;
 using System.Text.RegularExpressions;
+using Shard.Uni.Repositories;
 
 namespace Shard.Uni.Controllers
 {
@@ -13,11 +14,13 @@ namespace Shard.Uni.Controllers
     {
         private readonly UserService _userService;
         private readonly SectorService _sectorService;
+        private IUserRepository _repository;
 
-        public UsersController(UserService userService, SectorService sectorService)
+        public UsersController(UserService userService, SectorService sectorService, IUserRepository repository)
         {
             _userService = userService;
             _sectorService = sectorService;
+            _repository = repository;
         }
 
         // GET /Users/{id}
@@ -64,6 +67,7 @@ namespace Shard.Uni.Controllers
 
                 // Save User
                 _userService.Users.Add(user);
+                _repository.CreateUser(user);
 
                 // If not remote shard
                 if (!HttpContext.User.IsInRole(Constants.Roles.Shard))

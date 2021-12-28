@@ -9,5 +9,7 @@ namespace Shard.Uni.Repositories
     {
         Task<IReadOnlyList<User>> GetUsers();
         Task<User> GetById(int id);
+
+        void CreateUser(User user);
     }
 }

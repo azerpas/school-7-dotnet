@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Shard.Shared.Core;
 using Shard.Uni.Models;
+using Shard.Uni.Repositories;
 using Shard.Uni.Services;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,14 @@ namespace Shard.Uni.Controllers
         private UserService _userService;
         private readonly SectorService _sectorService;
         private IClock _clock;
+        private IBuildingRepository _repository; 
 
-        public BuildingsController(UserService userService, SectorService sectorService, IClock clock)
+        public BuildingsController(UserService userService, SectorService sectorService, IClock clock, IBuildingRepository buildingRepository)
         {
             _userService = userService;
             _sectorService = sectorService;
             _clock = clock;
+            _repository = buildingRepository;
         }
 
         // POST /users/{userId}/Buildings

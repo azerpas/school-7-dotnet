@@ -24,6 +24,11 @@ namespace Shard.Uni.Repositories
             this.logger = logger;
         }
 
+        public async void CreateBuilding(Building building)
+        {
+            await collection.InsertOneAsync(building);
+        }
+
         public async Task<Building> GetBuildingById(string id)
         {
             return await(await collection.FindAsync(id)).SingleAsync();
