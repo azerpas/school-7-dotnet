@@ -15,12 +15,14 @@ namespace Shard.Uni.Controllers
         private readonly UserService _userService;
         private readonly SectorService _sectorService;
         private IUserRepository _repository;
+        private IUnitRepository _unitRepository;
 
-        public UsersController(UserService userService, SectorService sectorService, IUserRepository repository)
+        public UsersController(UserService userService, SectorService sectorService, IUserRepository repository, IUnitRepository unitRepository)
         {
             _userService = userService;
             _sectorService = sectorService;
             _repository = repository;
+            _unitRepository = unitRepository;
         }
 
         // GET /Users/{id}
@@ -84,6 +86,8 @@ namespace Shard.Uni.Controllers
                     Unit unitScout = new Scout(system.Name, null);
                     Unit unitBuilder = new Builder(system.Name, null);
                     _userService.Units.Add(user.Id, new List<Unit> { unitScout, unitBuilder });
+                    _unitRepository.CreateUnit(unitScout);
+                    _unitRepository.CreateUnit(unitBuilder);
                     _userService.Buildings.Add(user.Id, new List<Building> { });
                 }
             }

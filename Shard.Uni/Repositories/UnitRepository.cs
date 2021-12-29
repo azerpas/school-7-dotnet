@@ -49,5 +49,10 @@ namespace Shard.Uni.Repositories
             });
             BsonSerializer.RegisterSerializer(new EnumSerializer<ResourceKind>(BsonType.String));
         }
+
+        public async void CreateUnit(Unit unit)
+        {
+            await collection.InsertOneAsync(unit);
+        }
     }
 }

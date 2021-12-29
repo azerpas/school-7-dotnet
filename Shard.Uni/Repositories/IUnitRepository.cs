@@ -9,5 +9,6 @@ namespace Shard.Uni.Repositories
         void RegisterClassMap();
         Task<IReadOnlyList<Unit>> GetUnits();
         Task<Unit> GetUnitById(string id);
+        void CreateUnit(Unit unit);
     }
 }

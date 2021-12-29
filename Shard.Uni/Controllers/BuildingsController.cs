@@ -30,7 +30,7 @@ namespace Shard.Uni.Controllers
 
         // POST /users/{userId}/Buildings
         [HttpPost("/users/{userId}/Buildings")]
-        public ActionResult<Building> CreateBuilding(string userId, [FromBody] CreateBuilding createBuilding)
+        public async Task<ActionResult<Building>> CreateBuilding(string userId, [FromBody] CreateBuilding createBuilding)
         {
             User user = _userService.Users.Find(user => user.Id == userId);
 
@@ -69,6 +69,7 @@ namespace Shard.Uni.Controllers
 
             Building building = createBuilding.ToClass(unit.System, unit.Planet, _clock);
             _userService.Buildings[user.Id].Add(building);
+            _repository.CreateBuilding(building);
 
             // Built in 5 minutes
             building.StartConstruction(_clock, planet, user, createBuilding.ResourceCategory);
